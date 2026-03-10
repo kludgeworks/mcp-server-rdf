@@ -5,7 +5,7 @@ spring:
     mcp:
       server:
         stdio: true
-        name: jena-sparql
+        name: rdf-sparql
         version: 0.0.1
         type: SYNC
   main:

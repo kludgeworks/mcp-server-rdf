@@ -1,25 +1,24 @@
 package com.kludgeworks.mcp.sparql;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Statement;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.web.client.RestClient;
 import java.io.IOException;
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RdfServiceTest {
 
     final String endpoint = "https://publications.europa.eu/webapi/rdf/sparql";
+    private static final int PAGE_SIZE = 300;
 
     private RdfService service;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        service = new RdfService();
+        objectMapper = new ObjectMapper();
+        service = new RdfService(RestClient.create(), objectMapper);
     }
 
     @Test
@@ -36,8 +35,12 @@ class RdfServiceTest {
                 }
                 """;
 
-        JsonNode json = service.select(endpoint, query);
-        System.out.println(json);
+        RdfService.PagedResult response = objectMapper.readValue(
+            service.select(endpoint, query, PAGE_SIZE, 0),
+            RdfService.PagedResult.class
+        );
+        assertEnvelope(response, PAGE_SIZE, 0);
+        assertThat(response.result()).contains("\"results\"");
     }
 
     @Test
@@ -59,8 +62,12 @@ class RdfServiceTest {
                 }
                 """;
 
-        JsonNode json = service.select(endpoint, query);
-        System.out.println(json);
+        RdfService.PagedResult response = objectMapper.readValue(
+            service.select(endpoint, query, PAGE_SIZE, 0),
+            RdfService.PagedResult.class
+        );
+        assertEnvelope(response, PAGE_SIZE, 0);
+        assertThat(response.result()).contains("\"results\"");
     }
 
     @Test
@@ -82,8 +89,12 @@ class RdfServiceTest {
                 }
                 """;
 
-        JsonNode json = service.select(endpoint, query);
-        System.out.println(json);
+        RdfService.PagedResult response = objectMapper.readValue(
+            service.select(endpoint, query, PAGE_SIZE, PAGE_SIZE),
+            RdfService.PagedResult.class
+        );
+        assertEnvelope(response, PAGE_SIZE, PAGE_SIZE);
+        assertThat(response.pagination().pageIndex()).isEqualTo(1);
     }
 
     @Test
@@ -91,7 +102,19 @@ class RdfServiceTest {
         String query = """
                     DESCRIBE <http://publications.europa.eu/resource/cellar/c38f361d-8a99-11e5-b8b7-01aa75ed71a1>
                 """;
-        JsonNode json = service.describe(endpoint, query);
-        System.out.println(json);
+        RdfService.PagedResult response = objectMapper.readValue(
+            service.describe(endpoint, query, PAGE_SIZE, 0),
+            RdfService.PagedResult.class
+        );
+        assertEnvelope(response, PAGE_SIZE, 0);
+        assertThat(response.result()).contains("http://");
+    }
+
+    private static void assertEnvelope(RdfService.PagedResult response, int pageSize, int offset) {
+        assertThat(response.pagination().pageSizeChars()).isEqualTo(pageSize);
+        assertThat(response.pagination().offset()).isEqualTo(offset);
+        assertThat(response.pagination().totalPages()).isGreaterThanOrEqualTo(1);
+        assertThat(response.pagination().returnedChars()).isLessThanOrEqualTo(pageSize);
+        assertThat(response.result()).isNotBlank();
     }
 }

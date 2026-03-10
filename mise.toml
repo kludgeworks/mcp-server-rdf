@@ -1,2 +1,6 @@
 [tools]
-java = "graalvm-community-23.0.2"
+java = "graalvm-community-25"
+
+[tasks."build:native"]
+description = "build native image"
+run = "./mvnw native:compile -Pnative"
