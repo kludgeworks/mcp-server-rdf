@@ -4,16 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestClient;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
-public class RdfService {
+class RdfService {
 
     private static final int DEFAULT_PAGE_SIZE_CHARS = 5000;
-    private static final MediaType SPARQL_QUERY_MEDIA_TYPE = MediaType.parseMediaType("application/sparql-query");
     private static final MediaType SPARQL_RESULTS_JSON_MEDIA_TYPE = MediaType.parseMediaType("application/sparql-results+json");
     private static final MediaType RDF_JSON_MEDIA_TYPE = MediaType.parseMediaType("application/rdf+json");
 
@@ -31,47 +29,30 @@ public class RdfService {
         String result
     ) {}
 
-    private final RestClient restClient;
+    private final RdfBackendClient rdfBackendClient;
     private final ObjectMapper objectMapper;
 
-    RdfService(RestClient restClient, ObjectMapper objectMapper) {
-        this.restClient = restClient;
+    RdfService(RdfBackendClient rdfBackendClient, ObjectMapper objectMapper) {
+        this.rdfBackendClient = rdfBackendClient;
         this.objectMapper = objectMapper;
     }
 
     @Tool(description = "Run a SELECT query against a RDF datastore. Returns a paged JSON envelope with pagination metadata and a result chunk.")
-    public String select(
+    String select(
     @McpToolParam(description = "SPARQL endpoint URL to execute the query against") String serviceUrl,
     @McpToolParam(description = "SPARQL SELECT query text") String query,
     @McpToolParam(description = "Maximum number of characters to return in this page: defaults to " + DEFAULT_PAGE_SIZE_CHARS, required = false) Integer maxChars,
     @McpToolParam(description = "Character offset for paging through the full response", required = false) Integer offset) throws IOException {
-        return paginate(executeQuery(serviceUrl, query, SPARQL_RESULTS_JSON_MEDIA_TYPE), maxChars, offset);
+        return paginate(rdfBackendClient.executeQuery(serviceUrl, query, SPARQL_RESULTS_JSON_MEDIA_TYPE), maxChars, offset);
     }
 
     @Tool(description = "Run a DESCRIBE query against a RDF datastore. Returns a paged JSON envelope with pagination metadata and a result chunk.")
-    public String describe(
+    String describe(
     @McpToolParam(description = "SPARQL endpoint URL to execute the query against") String serviceUrl,
     @McpToolParam(description = "SPARQL DESCRIBE query text") String query,
     @McpToolParam(description = "Maximum number of characters to return in this page", required = false) Integer maxChars,
     @McpToolParam(description = "Character offset for paging through the full response", required = false) Integer offset) throws IOException {
-        return paginate(executeQuery(serviceUrl, query, RDF_JSON_MEDIA_TYPE), maxChars, offset);
-    }
-
-    private String executeQuery(String serviceUrl, String query, MediaType acceptType) throws IOException {
-        String responseBody = restClient
-            .post()
-            .uri(serviceUrl)
-            .contentType(SPARQL_QUERY_MEDIA_TYPE)
-            .accept(acceptType)
-            .body(query)
-            .retrieve()
-            .body(String.class);
-
-        if (responseBody == null || responseBody.isBlank()) {
-            throw new IOException("RDF backend returned an empty response");
-        }
-
-        return responseBody;
+        return paginate(rdfBackendClient.executeQuery(serviceUrl, query, RDF_JSON_MEDIA_TYPE), maxChars, offset);
     }
 
     private String paginate(String responseBody, Integer maxChars, Integer offset) throws IOException {
@@ -98,5 +79,4 @@ public class RdfService {
 
         return objectMapper.writeValueAsString(payload);
     }
-
 }

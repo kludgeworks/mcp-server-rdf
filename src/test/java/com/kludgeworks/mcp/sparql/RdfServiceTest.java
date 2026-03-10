@@ -18,7 +18,7 @@ class RdfServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        service = new RdfService(RestClient.create(), objectMapper);
+        service = new RdfService(new RdfBackendClient(RestClient.create()), objectMapper);
     }
 
     @Test
