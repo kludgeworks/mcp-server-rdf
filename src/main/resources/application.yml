@@ -4,7 +4,7 @@ spring:
   ai:
     mcp:
       server:
-        transport: STDIO
+        stdio: true
         name: jena-sparql
         version: 0.0.1
         type: SYNC
