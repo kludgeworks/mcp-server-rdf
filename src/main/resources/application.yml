@@ -8,8 +8,5 @@ spring:
         name: rdf-sparql
         version: 0.0.1
         type: SYNC
-  cache:
-    jcache:
-      config: classpath:ehcache.xml
   main:
     banner-mode: off

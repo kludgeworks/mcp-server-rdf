@@ -18,7 +18,7 @@ class RdfBackendClient {
         this.restClient = restClient;
     }
 
-    @Cacheable(cacheNames = "rdfBackendResponses", key = "T(java.lang.String).join('||', #serviceUrl, #acceptType.toString(), #query)")
+    @Cacheable(cacheNames = "rdfBackendResponses", key = "#serviceUrl + '||' + #acceptType + '||' + #query")
     public String executeQuery(String serviceUrl, String query, MediaType acceptType) throws IOException {
         String responseBody = restClient
             .post()

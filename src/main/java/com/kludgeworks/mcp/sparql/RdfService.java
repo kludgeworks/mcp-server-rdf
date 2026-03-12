@@ -15,7 +15,7 @@ class RdfService {
     private static final MediaType SPARQL_RESULTS_JSON_MEDIA_TYPE = MediaType.parseMediaType("application/sparql-results+json");
     private static final MediaType RDF_JSON_MEDIA_TYPE = MediaType.parseMediaType("application/rdf+json");
 
-    record Pagination(
+    public record Pagination(
         int totalChars,
         int pageSizeChars,
         int totalPages,
@@ -24,7 +24,7 @@ class RdfService {
         int returnedChars
     ) {}
 
-    record PagedResult(
+    public record PagedResult(
         Pagination pagination,
         String result
     ) {}
