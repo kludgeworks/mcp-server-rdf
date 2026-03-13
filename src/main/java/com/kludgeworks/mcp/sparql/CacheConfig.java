@@ -1,6 +1,5 @@
 package com.kludgeworks.mcp.sparql;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.harawata.appdirs.AppDirs;
 import net.harawata.appdirs.AppDirsFactory;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -15,14 +14,10 @@ import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
 
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -31,8 +26,8 @@ import java.time.Duration;
 
 @Configuration
 @EnableCaching
-@ImportRuntimeHints(AppConfig.AppRuntimeHints.class)
-public class AppConfig {
+@ImportRuntimeHints(CacheConfig.CacheRuntimeHints.class)
+public class CacheConfig {
 
 	private static final String APP_AUTHOR = "kludgeworks";
 	private static final String APP_NAME = "mcp-sparql";
@@ -40,21 +35,6 @@ public class AppConfig {
 	private static final int HEAP_ENTRIES = 1000;
 	private static final int DISK_MB = 200;
 	private static final Duration TTL = Duration.ofHours(24);
-
-	@Bean
-	public ToolCallbackProvider rdfTools(RdfService rdfService) {
-		return MethodToolCallbackProvider.builder().toolObjects(rdfService).build();
-	}
-
-	@Bean
-	public RestClient restClient() {
-		return RestClient.create();
-	}
-
-	@Bean
-	public ObjectMapper objectMapper() {
-		return new ObjectMapper();
-	}
 
 	@Bean
 	public AppDirs appDirs() {
@@ -101,7 +81,7 @@ public class AppConfig {
 		return new File(appDirsPath, "ehcache");
 	}
 
-	static class AppRuntimeHints implements RuntimeHintsRegistrar {
+	static class CacheRuntimeHints implements RuntimeHintsRegistrar {
 
 		@Override
 		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {

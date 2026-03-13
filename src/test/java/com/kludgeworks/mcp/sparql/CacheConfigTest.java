@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AppConfigTest {
+class CacheConfigTest {
 
 	@Mock
 	AppDirs appDirs;
@@ -26,8 +26,8 @@ class AppConfigTest {
 	void usesAppDirsDirectoryWhenNoOverrideIsConfigured() {
 		when(appDirs.getUserDataDir("mcp-sparql", null, "kludgeworks")).thenReturn(tempDir.toString());
 
-		AppConfig appConfig = new AppConfig();
-		try (CacheManager cacheManager = appConfig.jCacheCacheManager(appDirs)) {
+		CacheConfig cacheConfig = new CacheConfig();
+		try (CacheManager cacheManager = cacheConfig.jCacheCacheManager(appDirs)) {
 			assertThat(cacheManager.getCache("rdfBackendResponses")).isNotNull();
 		}
 	}

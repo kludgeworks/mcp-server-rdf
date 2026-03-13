@@ -1,10 +1,9 @@
 package com.kludgeworks.mcp.sparql;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 

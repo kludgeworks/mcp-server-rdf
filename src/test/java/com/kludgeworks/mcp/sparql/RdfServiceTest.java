@@ -1,9 +1,9 @@
 package com.kludgeworks.mcp.sparql;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ class RdfServiceTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
+        objectMapper = JsonMapper.builder().build();
         service = new RdfService(new RdfBackendClient(RestClient.create()), objectMapper);
     }
 
