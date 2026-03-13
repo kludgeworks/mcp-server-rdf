@@ -29,8 +29,6 @@ import java.time.Duration;
 @ImportRuntimeHints(CacheConfig.CacheRuntimeHints.class)
 public class CacheConfig {
 
-	private static final String APP_AUTHOR = "kludgeworks";
-	private static final String APP_NAME = "mcp-sparql";
 	private static final String CACHE_NAME = "rdfBackendResponses";
 	private static final int HEAP_ENTRIES = 1000;
 	private static final int DISK_MB = 200;
@@ -42,10 +40,10 @@ public class CacheConfig {
 	}
 
 	@Bean(destroyMethod = "close")
-	public CacheManager jCacheCacheManager(AppDirs appDirs) {
+	public CacheManager jCacheCacheManager(AppDirs appDirs, AppMetadata appMetadata) {
 		EhcacheCachingProvider cachingProvider =
 			(EhcacheCachingProvider) Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
-		File persistenceDirectory = resolvePersistenceDirectory(appDirs);
+		File persistenceDirectory = resolvePersistenceDirectory(appDirs, appMetadata);
 		CacheManager cacheManager = createCacheManager(cachingProvider, persistenceDirectory);
 		if (cacheManager.getCache(CACHE_NAME) == null) {
 			cacheManager.createCache(CACHE_NAME, responseCacheConfiguration());
@@ -76,8 +74,8 @@ public class CacheConfig {
 		return Eh107Configuration.fromEhcacheCacheConfiguration(ehcacheConfig);
 	}
 
-	private File resolvePersistenceDirectory(AppDirs appDirs) {
-		String appDirsPath = appDirs.getUserDataDir(APP_NAME, null, APP_AUTHOR);
+	private File resolvePersistenceDirectory(AppDirs appDirs, AppMetadata appMetadata) {
+		String appDirsPath = appDirs.getUserDataDir(appMetadata.name(), appMetadata.version(), appMetadata.author());
 		return new File(appDirsPath, "ehcache");
 	}
 

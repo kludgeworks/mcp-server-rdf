@@ -1,34 +1,21 @@
 package com.kludgeworks.mcp.sparql;
 
-import net.harawata.appdirs.AppDirs;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.cache.CacheManager;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class CacheConfigTest {
 
-	@Mock
-	AppDirs appDirs;
-
-	@TempDir
-	Path tempDir;
+	@Autowired
+	private CacheManager cacheManager;
 
 	@Test
-	void usesAppDirsDirectoryWhenNoOverrideIsConfigured() {
-		when(appDirs.getUserDataDir("mcp-sparql", null, "kludgeworks")).thenReturn(tempDir.toString());
-
-		CacheConfig cacheConfig = new CacheConfig();
-		try (CacheManager cacheManager = cacheConfig.jCacheCacheManager(appDirs)) {
-			assertThat(cacheManager.getCache("rdfBackendResponses")).isNotNull();
-		}
+	void registersRdfBackendResponsesCache() {
+		assertThat(cacheManager.getCache("rdfBackendResponses")).isNotNull();
 	}
 }

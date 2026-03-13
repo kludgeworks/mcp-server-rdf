@@ -2,6 +2,9 @@ package com.kludgeworks.mcp.sparql;
 
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -19,4 +22,14 @@ public class AppCoreConfig {
 		return restClientBuilder.build();
 	}
 
+	@Bean
+	public AppMetadata appMetadata(
+		@Value("${spring.application.name}") String applicationName,
+		ObjectProvider<BuildProperties> buildPropertiesProvider
+	) {
+		BuildProperties buildProperties = buildPropertiesProvider.getIfAvailable();
+		String author = buildProperties != null ? buildProperties.getGroup() : "kludgeworks";
+		String version = buildProperties != null ? buildProperties.getVersion() : "unknown";
+		return new AppMetadata(applicationName, author, version);
+	}
 }

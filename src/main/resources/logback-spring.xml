@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+	<springProperty scope="context" name="SPRING_APP_NAME" source="spring.application.name" defaultValue="mcp-sparql"/>
+	<springProperty scope="context" name="BUILD_GROUP" source="build.group" defaultValue="kludgeworks"/>
+	<springProperty scope="context" name="BUILD_VERSION" source="build.version" defaultValue="unknown"/>
+	<define name="APP_LOG_DIR" class="com.kludgeworks.mcp.sparql.logging.AppDirsLogPathDefiner">
+		<appName>${SPRING_APP_NAME}</appName>
+		<appAuthor>${BUILD_GROUP}</appAuthor>
+		<appVersion>${BUILD_VERSION}</appVersion>
+	</define>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<target>System.err</target>
@@ -10,7 +18,22 @@
 		</encoder>
 	</appender>
 
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${APP_LOG_DIR}/mcp-sparql.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${APP_LOG_DIR}/mcp-sparql.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<maxFileSize>10MB</maxFileSize>
+			<maxHistory>14</maxHistory>
+			<totalSizeCap>1GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+			<charset>${FILE_LOG_CHARSET}</charset>
+		</encoder>
+	</appender>
+
 	<root level="INFO">
 		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="FILE"/>
 	</root>
 </configuration>
