@@ -9,9 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kludgeworks</groupId>
-	<artifactId>mcp.sparql</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>mcp.sparql</name>
+	<artifactId>sparql-mcp</artifactId>
+	<!-- Base version is overridden at build time by maven-git-versioning-extension using git refs/tags. -->
+	<version>0.0.0-SNAPSHOT</version>
+	<name>sparql-mcp</name>
 	<description>MCP server to query SPARQL servers</description>
 	<url/>
 	<licenses>

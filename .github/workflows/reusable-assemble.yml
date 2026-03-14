@@ -64,4 +64,4 @@ jobs:
           retention-days: 1
           name: artifact-${{ runner.os }}-${{ runner.arch }}
           path: |
-            out/jreleaser/assemble/mcp-sparql/native-image/*
+            out/jreleaser/assemble/sparql-mcp/native-image/*

@@ -6,7 +6,7 @@ project:
     java:
       version: 25
       groupId: com.kludgeworks
-      artifactId: mcp.sparql
+      artifactId: sparql-mcp
       mainClass: com.kludgeworks.mcp.sparql.Application
 
 platform:
@@ -35,13 +35,13 @@ catalog:
 
 assemble:
   nativeImage:
-    mcp-sparql:
+    sparql-mcp:
       active: ALWAYS
-      imageName: mcp-sparql
+      imageName: sparql-mcp
       archiving:
         enabled: true
       mainJar:
-        path: target/mcp-sparql-{{projectVersion}}.jar
+        path: target/sparql-mcp-{{projectVersion}}.jar
 
 #packagers:
 #  brew:
