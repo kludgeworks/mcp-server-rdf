@@ -5,6 +5,7 @@ java = "graalvm-community-25"
 description = "run Maven lifecycle goals"
 tools = { usage = "latest" }
 alias = "b"
+shell = "bash -c"
 usage = '''
 arg "[goals]..." {
   choices "validate" "compile" "test" "package" "verify" "install" "deploy" "native:compile" "spring-boot:run" "spring-boot:build-image"
