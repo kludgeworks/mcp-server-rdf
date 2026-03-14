@@ -42,6 +42,7 @@ jobs:
       - name: Assemble Native Image
         uses: jreleaser/release-action@v2
         with:
+          setup-java: false
           arguments: assemble --select-current-platform
         env:
           JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}

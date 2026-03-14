@@ -118,6 +118,7 @@ jobs:
       - name: Release
         uses: jreleaser/release-action@v2
         with:
+          setup-java: false
           arguments: full-release
         env:
           JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.version }}
