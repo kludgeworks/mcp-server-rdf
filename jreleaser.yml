@@ -27,9 +27,11 @@ release:
 catalog:
   sbom:
     cyclonedx:
-      mcp-sparql:
-        active: ALWAYS
-        path: target/bom.json
+      active: ALWAYS
+      distributions: true
+      files: true
+      formats:
+        - JSON
 
 assemble:
   nativeImage:
