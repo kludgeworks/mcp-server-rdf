@@ -1,0 +1,53 @@
+project:
+  name: mcp.sparql
+  description: MCP server to query SPARQL servers
+  stereotype: CLI
+  languages:
+    java:
+      version: 25
+      groupId: com.kludgeworks
+      artifactId: mcp.sparql
+      mainClass: com.kludgeworks.mcp.sparql.Application
+
+platform:
+  replacements:
+    aarch_64: aarch64
+    x86_64: x64
+
+release:
+  github:
+    owner: kludgeworks
+    name: mcp.sparql
+    overwrite: true
+    draft: true
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+
+catalog:
+  sbom:
+    cyclonedx:
+      mcp-sparql:
+        active: ALWAYS
+        path: target/bom.json
+
+assemble:
+  nativeImage:
+    mcp-sparql:
+      active: ALWAYS
+      imageName: mcp-sparql
+      archiving:
+        enabled: true
+      mainJar:
+        path: target/{{projectArtifactId}}-{{projectVersion}}.jar
+
+#packagers:
+#  brew:
+#    active: ALWAYS
+#    multiPlatform: true
+#    formulaName: McpSparql
+#    repository:
+#      active: ALWAYS
+#      owner: kludgeworks
+#      name: homebrew-tap
+#      branch: main

@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump strategy
+        required: true
+        default: next
+        type: choice
+        options:
+          - next
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: Compute next version only (no tag push, no release)
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  precheck:
+    name: Precheck
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.vars.outputs.version }}
+      dry_run: ${{ steps.vars.outputs.dry_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          cache: true
+
+      - name: Resolve version
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            DRY_RUN="${{ github.event.inputs.dry_run }}"
+            VERSION="$(RELEASE_BUMP="${{ github.event.inputs.bump }}" RELEASE_DRY_RUN=true mise run -q release:tag | tail -n1 | tr -d '\r')"
+
+            if [[ "$DRY_RUN" != "true" ]]; then
+              RELEASE_BUMP="${{ github.event.inputs.bump }}" RELEASE_PUSH=true mise run -q release:tag
+            fi
+          else
+            TAG="${GITHUB_REF_NAME}"
+            VERSION="${TAG#v}"
+            DRY_RUN="false"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+
+  assemble:
+    if: needs.precheck.outputs.dry_run == 'false'
+    needs: [precheck]
+    uses: ./.github/workflows/reusable-assemble.yml
+    with:
+      project-version: ${{ needs.precheck.outputs.version }}
+    secrets: inherit
+
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [precheck, assemble]
+    if: needs.precheck.outputs.dry_run == 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Download assembled artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-*
+          merge-multiple: true
+          path: out/jreleaser/assemble/mcp-sparql/native-image
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          cache: true
+
+      - name: Release
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: full-release
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload JReleaser logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: jreleaser-release
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties

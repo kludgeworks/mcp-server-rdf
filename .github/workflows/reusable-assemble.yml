@@ -1,0 +1,57 @@
+name: Assemble
+
+on:
+  workflow_call:
+    inputs:
+      project-version:
+        required: true
+        type: string
+
+jobs:
+  assemble:
+    name: Assemble ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          cache: true
+
+      - name: Build
+        run: mise run build package
+
+      - name: Assemble Native Image
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: assemble --select-current-platform
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload JReleaser logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: jreleaser-assemble-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties
+
+      - name: Upload assembled artifact
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: artifact-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            out/jreleaser/assemble/mcp-sparql/native-image/*

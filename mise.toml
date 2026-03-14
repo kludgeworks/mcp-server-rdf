@@ -1,6 +1,71 @@
 [tools]
 java = "graalvm-community-25"
 
-[tasks."build:native"]
-description = "build native image"
-run = "./mvnw native:compile -Pnative"
+[tasks.build]
+description = "run Maven lifecycle goals"
+tools = { usage = "latest" }
+alias = "b"
+usage = '''
+arg "[goals]..." {
+  choices "validate" "compile" "test" "package" "verify" "install" "deploy" "native:compile" "spring-boot:run" "spring-boot:build-image"
+}
+flag "-c --clean" help="run clean before the selected goal"
+flag "-s --skip-tests" help="set -DskipTests"
+flag "-p --profile <profile>" {
+  choices "native" "nativeTest"
+}
+'''
+run = '''
+MVN_ARGS=()
+
+if [ "${usage_skip_tests:-false}" = "true" ]; then
+  MVN_ARGS+=("-DskipTests")
+fi
+
+if [ "${usage_clean:-false}" = "true" ]; then
+  MVN_ARGS+=("clean")
+fi
+
+if [ -n "${usage_profile:-}" ]; then
+  MVN_ARGS+=("-P${usage_profile}")
+fi
+
+if [ -n "${usage_goals:-}" ]; then
+  eval "GOALS=(${usage_goals:-})"
+  MVN_ARGS+=("${GOALS[@]}")
+else
+  MVN_ARGS+=("package")
+fi
+
+./mvnw "${MVN_ARGS[@]}"
+'''
+
+[tasks."release:tag"]
+description = "create the next semantic version tag"
+tools = { svu = "latest", usage = "latest" }
+alias = "tag"
+usage = '''
+arg "[bump]" {
+  choices "next" "patch" "minor" "major"
+  default "next"
+  env "RELEASE_BUMP"
+}
+flag "-n --dry-run" help="print the next version without creating a tag" env="RELEASE_DRY_RUN"
+flag "--push" help="push created tag to origin" env="RELEASE_PUSH"
+'''
+run = '''
+BUMP="${usage_bump:-next}"
+NEXT_TAG="$(svu "${BUMP}")"
+
+if [ "${usage_dry_run:-false}" = "true" ]; then
+  echo "${NEXT_TAG#v}"
+  exit 0
+fi
+
+git tag -s "${NEXT_TAG}" -m "Release ${NEXT_TAG}"
+echo "Created tag ${NEXT_TAG}"
+if [ "${usage_push:-false}" = "true" ]; then
+  git push origin "${NEXT_TAG}"
+  echo "Pushed tag ${NEXT_TAG} to origin"
+fi
+'''
