@@ -44,9 +44,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
           restore-keys: |
-            ${{ runner.os }}-m2-
+            ${{ runner.os }}-${{ runner.arch }}-m2-
 
       - name: Build
         run: mise run build --clean --profile native native:compile

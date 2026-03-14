@@ -44,19 +44,19 @@ distributions:
   sparql-mcp:
     type: BINARY
     artifacts:
-      - path: target/sparql-mcp
+      - path: artifacts/artifact-linux-x86_64/sparql-mcp
         platform: linux-x86_64
         extraProperties:
           graalVMNativeImage: true
-      - path: target/sparql-mcp
+      - path: artifacts/artifact-linux-aarch_64/sparql-mcp
         platform: linux-aarch_64
         extraProperties:
           graalVMNativeImage: true
-      - path: target/sparql-mcp
+      - path: artifacts/artifact-osx-aarch_64/sparql-mcp
         platform: osx-aarch_64
         extraProperties:
           graalVMNativeImage: true
-      - path: target/sparql-mcp.exe
+      - path: artifacts/artifact-windows-x86_64/sparql-mcp.exe
         platform: windows-x86_64
         extraProperties:
           graalVMNativeImage: true
