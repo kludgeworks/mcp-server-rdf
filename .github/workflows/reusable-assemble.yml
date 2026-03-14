@@ -9,11 +9,23 @@ on:
 
 jobs:
   assemble:
-    name: Assemble ${{ matrix.os }}
+    name: Assemble ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+            binary_source: target/sparql-mcp
+          - os: ubuntu-24.04-arm
+            platform: linux-aarch_64
+            binary_source: target/sparql-mcp
+          - os: macos-latest
+            platform: osx-aarch_64
+            binary_source: target/sparql-mcp
+          - os: windows-latest
+            platform: windows-x86_64
+            binary_source: target/sparql-mcp.exe
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -37,31 +49,11 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build
-        run: mise run build package
+        run: mise run build --clean --profile native native:compile
 
-      - name: Assemble Native Image
-        uses: jreleaser/release-action@v2
-        with:
-          setup-java: false
-          arguments: assemble --select-current-platform
-        env:
-          JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload JReleaser logs
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v7
         with:
           retention-days: 1
-          name: jreleaser-assemble-${{ runner.os }}-${{ runner.arch }}
-          path: |
-            out/jreleaser/trace.log
-            out/jreleaser/output.properties
-
-      - name: Upload assembled artifact
-        uses: actions/upload-artifact@v4
-        with:
-          retention-days: 1
-          name: artifact-${{ runner.os }}-${{ runner.arch }}
-          path: |
-            out/jreleaser/assemble/sparql-mcp/native-image/*
+          name: artifact-${{ matrix.platform }}
+          path: ${{ matrix.binary_source }}
