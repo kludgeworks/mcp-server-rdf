@@ -41,7 +41,7 @@ assemble:
       archiving:
         enabled: true
       mainJar:
-        path: target/{{projectArtifactId}}-{{projectVersion}}.jar
+        path: target/mcp-sparql-{{projectVersion}}.jar
 
 #packagers:
 #  brew:
