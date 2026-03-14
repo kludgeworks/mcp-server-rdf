@@ -37,8 +37,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v4
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
 
       - name: Configure git identity
@@ -93,8 +94,9 @@ jobs:
           path: out/jreleaser/assemble/mcp-sparql/native-image
 
       - name: Setup mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v4
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
 
       - name: Release

@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,8 +17,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v4
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
 
       - name: Run tests
