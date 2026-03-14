@@ -15,6 +15,7 @@ flag "-s --skip-tests" help="set -DskipTests"
 flag "-p --profile <profile>" {
   choices "native" "nativeTest"
 }
+flag "--native-image-name <name>" help="set -Dnative.image.name for native builds"
 '''
 run = '''
 MVN_ARGS=()
@@ -29,6 +30,10 @@ fi
 
 if [ -n "${usage_profile:-}" ]; then
   MVN_ARGS+=("-P${usage_profile}")
+fi
+
+if [ -n "${usage_native_image_name:-}" ]; then
+  MVN_ARGS+=("-Dnative.image.name=${usage_native_image_name}")
 fi
 
 if [ -n "${usage_goals:-}" ]; then

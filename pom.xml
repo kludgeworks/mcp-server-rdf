@@ -31,6 +31,7 @@
 		<java.version>25</java.version>
 		<spring-ai.version>2.0.0-M2</spring-ai.version>
 		<spring-modulith.version>2.0.3</spring-modulith.version>
+		<native.image.name>${project.artifactId}</native.image.name>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -130,6 +131,9 @@
 			<plugin>
 				<groupId>org.graalvm.buildtools</groupId>
 				<artifactId>native-maven-plugin</artifactId>
+				<configuration>
+					<imageName>${native.image.name}</imageName>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.cyclonedx</groupId>
