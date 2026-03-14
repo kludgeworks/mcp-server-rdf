@@ -41,6 +41,11 @@ jobs:
         with:
           cache: true
 
+      - name: Configure git identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Resolve version
         id: vars
         shell: bash
