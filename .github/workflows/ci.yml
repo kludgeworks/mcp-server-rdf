@@ -32,3 +32,6 @@ jobs:
 
       - name: Run tests
         run: mise run build test
+
+      - name: Run native tests
+        run: mise run build --profile nativeTest test
