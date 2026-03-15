@@ -26,7 +26,6 @@ release:
     owner: kludgeworks
     name: mcp-server-rdf
     overwrite: true
-    draft: true
     changelog:
       formatted: ALWAYS
       preset: conventional-commits
