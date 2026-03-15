@@ -22,13 +22,22 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
 
-      - name: Cache Maven repository
+      - name: Cache Maven
+        id: cache-m2
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+            ~/.m2/mvnd
           key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-m2-
+
+      - name: Maven cache debug
+        run: |
+          echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
+          ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
 
       - name: Run tests
         run: mise run build test
