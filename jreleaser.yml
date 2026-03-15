@@ -29,6 +29,8 @@ release:
     changelog:
       formatted: ALWAYS
       preset: conventional-commits
+      contributors:
+        format: "- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}"
 
 catalog:
   sbom:
