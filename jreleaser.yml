@@ -45,6 +45,7 @@ distributions:
   sparql-mcp:
     type: BINARY
     artifacts:
+      - path: target/sparql-mcp-{{projectVersion}}.jar
       - path: artifacts/artifact-linux-x86_64/sparql-mcp-linux-x86_64
         platform: linux-x86_64
         extraProperties:

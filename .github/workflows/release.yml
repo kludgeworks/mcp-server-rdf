@@ -119,6 +119,9 @@ jobs:
           echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
           ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
 
+      - name: Build release jar
+        run: mise run build --skip-tests package
+
       - name: Release
         uses: jreleaser/release-action@v2
         with:
