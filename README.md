@@ -11,7 +11,7 @@ Spring Boot MCP server that executes SPARQL queries against RDF backends.
 ```bash
 mise trust
 mise install
-mise build spring-boot:run
+run
 ```
 
 > [!TIP]
@@ -31,6 +31,18 @@ Examples:
 mise build --clean --profile native native:compile
 mise build --clean --profile native --native-image-name sparql-mcp-linux-x86_64 native:compile
 ```
+
+## Shell Aliases
+
+After activating mise in your shell you can use these aliases:
+
+- `build` -> `mise run build`
+- `run` -> `mise run build spring-boot:run`
+- `build-test` -> `mise run build test`
+- `build-package` -> `mise run build package`
+- `build-native` -> `mise run build --profile native native:compile`
+- `build-native-test` -> `mise run build --profile nativeTest test`
+- `release-tag` -> `mise run release:tag`
 
 ## Versioning
 
@@ -56,7 +68,7 @@ Artifacts and publication are then handled by GitHub Actions + JReleaser:
 
 Artifacts are produced per platform with unique names, then attached to the GitHub release.
 
-> [!INFO]
+> [!IMPORTANT]
 > The `workflow_dispatch` entry point currently fails for our release process. We need artifact signing as part of the workflow, and for now the working path is via the CLI (`mise tag --push`).
 
 ## Notes
