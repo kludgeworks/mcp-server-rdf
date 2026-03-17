@@ -1,0 +1,45 @@
+amends "package://github.com/jdx/hk/releases/download/v1.32.0/hk@1.32.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.32.0/hk@1.32.0#/Builtins.pkl"
+
+local linters = new Mapping<String, Step> {
+  ["check-merge-conflict"] = Builtins.check_merge_conflict
+  ["check_added_large_files"] = Builtins.check_added_large_files
+  ["google_java_format"] {
+    glob = List("**/*.java")
+    exclude = List("**/target/**")
+    check = "google-java-format --dry-run --set-exit-if-changed {{files}}"
+    fix = "google-java-format --replace {{files}}"
+    batch = true
+  }
+  ["mise"] = Builtins.mise
+  ["mixed_line_ending"] = Builtins.mixed_line_ending
+  ["newlines"] = (Builtins.newlines)
+  ["pkl_format"] = Builtins.pkl_format
+  ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
+    exclude =
+      (Builtins.trailing_whitespace.exclude ?? List()) //TODO log an issue with hk about this, it feels awkward
+        + List(
+          "**/*.md" // a trailing whitespace in md can be intentional for formatting purposes
+        )
+  }
+  ["yaml"] = (Builtins.yamlfmt)
+  ["commits"] = (Builtins.check_conventional_commit)
+}
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps = linters
+  }
+  ["pre-push"] {
+    steps = linters
+  }
+  ["fix"] {
+    fix = true
+    steps = linters
+  }
+  ["check"] {
+    steps = linters
+  }
+}

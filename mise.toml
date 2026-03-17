@@ -1,5 +1,25 @@
 [tools]
 java = "graalvm-community-25"
+hk = { version = "latest", postinstall = "hk install --mise" }
+pkl = "latest"
+"github:google/google-java-format" = "latest"
+uv = "latest"
+actionlint = "latest"
+yamlfmt = "latest"
+
+[env]
+HK_MISE = true
+
+[settings]
+env_cache = true
+
+[tasks.lint]
+description = "Run hk validation checks configured for the project"
+run = "hk check"
+
+[tasks.fix]
+description = "Apply hk automatic fixes configured for the project"
+run = "hk fix"
 
 [tasks.build]
 description = "run Maven lifecycle goals"
