@@ -35,7 +35,7 @@ jobs:
         id: precheck-app-token
         uses: actions/create-github-app-token@v3.0.0
         with:
-          app-id: ${{ secrets.KLUDGEWORKS_SPARQL_ID }}
+          app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
           private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
           owner: kludgeworks
           repositories: mcp-server-rdf
@@ -123,7 +123,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3.0.0
         with:
-          app-id: ${{ secrets.KLUDGEWORKS_SPARQL_ID }}
+          app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
           private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
           owner: kludgeworks
           repositories: homebrew-tap
