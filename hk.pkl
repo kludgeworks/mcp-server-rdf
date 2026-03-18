@@ -2,6 +2,7 @@ amends "package://github.com/jdx/hk/releases/download/v1.32.0/hk@1.32.0#/Config.
 import "package://github.com/jdx/hk/releases/download/v1.32.0/hk@1.32.0#/Builtins.pkl"
 
 local linters = new Mapping<String, Step> {
+  ["actionlint"] = (Builtins.actionlint)
   ["check-merge-conflict"] = Builtins.check_merge_conflict
   ["check_added_large_files"] = Builtins.check_added_large_files
   ["google_java_format"] {
