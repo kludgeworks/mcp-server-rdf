@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MISE_HTTP_TIMEOUT: 90s
+      MISE_VERBOSE: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v6
