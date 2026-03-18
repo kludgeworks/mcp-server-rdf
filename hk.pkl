@@ -23,7 +23,6 @@ local linters = new Mapping<String, Step> {
         )
   }
   ["yaml"] = (Builtins.yamlfmt)
-  ["commits"] = (Builtins.check_conventional_commit)
 }
 
 hooks {
@@ -41,5 +40,10 @@ hooks {
   }
   ["check"] {
     steps = linters
+  }
+  ["commit-msg"] {
+    steps {
+      ["commits"] = Builtins.check_conventional_commit
+    }
   }
 }
