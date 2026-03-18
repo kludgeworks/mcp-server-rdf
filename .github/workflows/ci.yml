@@ -1,27 +1,25 @@
 name: CI
-
 on:
   push:
     branches:
       - '**'
   pull_request:
-
 jobs:
   test:
     name: build
     runs-on: ubuntu-latest
+    env:
+      MISE_HTTP_TIMEOUT: 90s
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Setup mise
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
-
       - name: Cache Maven
         id: cache-m2
         uses: actions/cache@v5
@@ -33,14 +31,11 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-m2-
-
       - name: Maven cache debug
         run: |
           echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
           ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
-
       - name: Run tests
         run: mise run build test
-
       - name: Run native tests
         run: mise run build --profile nativeTest test

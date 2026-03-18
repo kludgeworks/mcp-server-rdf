@@ -1,12 +1,10 @@
 name: Assemble
-
 on:
   workflow_call:
     inputs:
       project-version:
         required: true
         type: string
-
 jobs:
   assemble:
     name: Assemble ${{ matrix.platform }}
@@ -31,19 +29,19 @@ jobs:
             native_image_name: sparql-mcp-windows-x86_64
             binary_source: target/sparql-mcp-windows-x86_64.exe
     runs-on: ${{ matrix.os }}
+    env:
+      MISE_HTTP_TIMEOUT: 90s
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-
       - name: Setup mise
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
-
       - name: Cache Maven
         id: cache-m2
         uses: actions/cache@v5
@@ -55,15 +53,12 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-m2-
-
       - name: Maven cache debug
         run: |
           echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
           ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
-
       - name: Build
         run: mise run build --clean --profile native --native-image-name "${{ matrix.native_image_name }}" native:compile
-
       - name: Upload native artifact
         uses: actions/upload-artifact@v7
         with:
