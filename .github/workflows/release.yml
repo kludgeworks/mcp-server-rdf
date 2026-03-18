@@ -1,6 +1,5 @@
 name: Release
 run-name: Release ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_number) }}
-
 on:
   push:
     tags:
@@ -22,10 +21,8 @@ on:
         required: true
         default: true
         type: boolean
-
 permissions:
   contents: write
-
 jobs:
   precheck:
     name: Precheck
@@ -34,23 +31,31 @@ jobs:
       version: ${{ steps.vars.outputs.version }}
       dry_run: ${{ steps.vars.outputs.dry_run }}
     steps:
+      - name: Generate GitHub App token for repository operations
+        id: precheck-app-token
+        uses: actions/create-github-app-token@v3.0.0
+        with:
+          app-id: ${{ secrets.KLUDGEWORKS_SPARQL_ID }}
+          private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
+          owner: kludgeworks
+          repositories: mcp-server-rdf
+          permission-contents: write
+          permission-metadata: read
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
           fetch-depth: 0
-
+          token: ${{ steps.precheck-app-token.outputs.token }}
       - name: Setup mise
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
-
       - name: Configure git identity
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
       - name: Resolve version
         id: vars
         shell: bash
@@ -69,7 +74,6 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
-
   assemble:
     if: needs.precheck.outputs.dry_run == 'false'
     needs: [precheck]
@@ -77,7 +81,6 @@ jobs:
     with:
       project-version: ${{ needs.precheck.outputs.version }}
     secrets: inherit
-
   release:
     name: Publish Release
     runs-on: ubuntu-latest
@@ -89,19 +92,16 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-
       - name: Download assembled artifacts
         uses: actions/download-artifact@v8
         with:
           pattern: artifact-*
           path: artifacts
-
       - name: Setup mise
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
-
       - name: Cache Maven
         id: cache-m2
         uses: actions/cache@v5
@@ -113,16 +113,23 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-m2-
-
       - name: Maven cache debug
         run: |
           echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
           ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
-
       - name: Build release jar
         run: mise run build --skip-tests package
-
-      - name: Release
+      - name: Generate GitHub App token for Homebrew tap
+        id: app-token
+        uses: actions/create-github-app-token@v3.0.0
+        with:
+          app-id: ${{ secrets.KLUDGEWORKS_SPARQL_ID }}
+          private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
+          owner: kludgeworks
+          repositories: homebrew-tap
+          permission-contents: write
+          permission-metadata: read
+      - name: Version & Tag
         uses: jreleaser/release-action@v2
         with:
           setup-java: false
@@ -130,7 +137,7 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          JRELEASER_HOMEBREW_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Upload JReleaser logs
         if: always()
         uses: actions/upload-artifact@v7
