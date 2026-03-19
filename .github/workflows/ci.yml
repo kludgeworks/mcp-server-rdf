@@ -11,6 +11,7 @@ jobs:
     env:
       MISE_HTTP_TIMEOUT: 90s
       MISE_VERBOSE: 1
+      MISE_VERSION: 2026.3.6
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -37,6 +38,8 @@ jobs:
           echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
           ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
       - name: Run tests
-        run: mise run build test
+        run: |
+          mise version
+          mise run build test
       - name: Run native tests
         run: mise run build --profile nativeTest test
