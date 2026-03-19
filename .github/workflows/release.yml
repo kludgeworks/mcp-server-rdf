@@ -27,8 +27,6 @@ jobs:
   precheck:
     name: Precheck
     runs-on: ubuntu-latest
-    env:
-      MISE_HTTP_TIMEOUT: 90s
     outputs:
       version: ${{ steps.vars.outputs.version }}
       dry_run: ${{ steps.vars.outputs.dry_run }}
@@ -65,8 +63,9 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             DRY_RUN="${{ github.event.inputs.dry_run }}"
             VERSION="$(RELEASE_BUMP="${{ github.event.inputs.bump }}" RELEASE_DRY_RUN=true mise run -q release:tag | tail -n1 | tr -d '\r')"
+            echo "Resolved version: $VERSION"
 
-            if [[ "$DRY_RUN" != "true" ]]; then
+            if [[ "$DRY_RUN" == "false" ]]; then
               RELEASE_BUMP="${{ github.event.inputs.bump }}" RELEASE_PUSH=true mise run -q release:tag
             fi
           else
