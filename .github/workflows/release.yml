@@ -117,10 +117,6 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-m2-
-      - name: Maven cache debug
-        run: |
-          echo "cache-hit=${{ steps.cache-m2.outputs.cache-hit }}"
-          ./mvnw -q help:evaluate -Dexpression=settings.localRepository -DforceStdout
       - name: Build release jar
         run: mise run build --skip-tests package
       - name: Generate GitHub App token for Homebrew tap

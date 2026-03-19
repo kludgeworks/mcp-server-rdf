@@ -15,12 +15,10 @@ project:
       groupId: com.kludgeworks
       artifactId: sparql-mcp
       mainClass: com.kludgeworks.mcp.sparql.Application
-
 platform:
   replacements:
     aarch_64: aarch64
     x86_64: x64
-
 release:
   github:
     owner: kludgeworks
@@ -31,7 +29,6 @@ release:
       preset: conventional-commits
       contributors:
         format: "- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}"
-
 catalog:
   sbom:
     cyclonedx:
@@ -40,28 +37,43 @@ catalog:
       files: true
       formats:
         - JSON
-
+assemble:
+  archive:
+    sparqlMcp:
+      active: NEVER
+      exported: false
+      distributionType: BINARY
+      attachPlatform: true
+      formats:
+        - ZIP
+      archiveName: sparql-mcp-{{projectVersion}}
+      fileSets:
+        - input: .
+          includes:
+            - LICENSE
+            - README.md
+        - input: target/release
+          output: bin
+          includes:
+            - sparql-mcp
+            - sparql-mcp.exe
+files:
+  artifacts:
+    - path: target/sparql-mcp-{{projectVersion}}.jar
 distributions:
   sparql-mcp:
     type: BINARY
+    extraProperties:
+      graalVMNativeImage: true
     artifacts:
-      - path: target/sparql-mcp-{{projectVersion}}.jar
-      - path: artifacts/artifact-linux-x86_64/sparql-mcp-linux-x86_64
+      - path: artifacts/artifact-linux-x86_64/sparql-mcp-{{projectVersion}}-linux-x64.zip
         platform: linux-x86_64
-        extraProperties:
-          graalVMNativeImage: true
-      - path: artifacts/artifact-linux-aarch_64/sparql-mcp-linux-aarch_64
+      - path: artifacts/artifact-linux-aarch_64/sparql-mcp-{{projectVersion}}-linux-aarch64.zip
         platform: linux-aarch_64
-        extraProperties:
-          graalVMNativeImage: true
-      - path: artifacts/artifact-osx-aarch_64/sparql-mcp-osx-aarch_64
+      - path: artifacts/artifact-osx-aarch_64/sparql-mcp-{{projectVersion}}-osx-aarch64.zip
         platform: osx-aarch_64
-        extraProperties:
-          graalVMNativeImage: true
-      - path: artifacts/artifact-windows-x86_64/sparql-mcp-windows-x86_64.exe
+      - path: artifacts/artifact-windows-x86_64/sparql-mcp-{{projectVersion}}-windows-x64.zip
         platform: windows-x86_64
-        extraProperties:
-          graalVMNativeImage: true
 
 #packagers:
 #  brew:
