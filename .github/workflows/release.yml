@@ -89,15 +89,9 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && steps.vars.outputs.dry_run == 'true'
         shell: bash
         run: |
-          {
-            echo "## Release Dry Run"
-            echo
-            echo "- Resolved version: \`${{ steps.vars.outputs.version }}\`"
-            echo
-            echo "## Changelog Preview"
-            echo
-            cat out/jreleaser/release/CHANGELOG.md
-          } >> "$GITHUB_STEP_SUMMARY"
+          cat out/jreleaser/release/CHANGELOG.md
+          sed -E "1s/^#+ .*/# CHANGELOG PREVIEW v${{ steps.vars.outputs.version }}/" \
+            out/jreleaser/release/CHANGELOG.md >> "$GITHUB_STEP_SUMMARY"
   assemble:
     if: needs.precheck.outputs.dry_run == 'false'
     needs: [precheck]
