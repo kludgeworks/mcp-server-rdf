@@ -64,10 +64,6 @@ jobs:
             DRY_RUN="${{ github.event.inputs.dry_run }}"
             VERSION="$(RELEASE_BUMP="${{ github.event.inputs.bump }}" RELEASE_DRY_RUN=true mise run -q release:tag | tail -n1 | tr -d '\r')"
             echo "Resolved version: $VERSION"
-
-            if [[ "$DRY_RUN" == "false" ]]; then
-              RELEASE_BUMP="${{ github.event.inputs.bump }}" RELEASE_PUSH=true mise run -q release:tag
-            fi
           else
             TAG="${GITHUB_REF_NAME}"
             VERSION="${TAG#v}"
@@ -75,6 +71,33 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+      - name: Create release tag
+        if: github.event_name == 'workflow_dispatch' && steps.vars.outputs.dry_run == 'false'
+        uses: actions/github-script@v8
+        env:
+          VERSION: ${{ steps.vars.outputs.version }}
+        with:
+          github-token: ${{ steps.precheck-app-token.outputs.token }}
+          script: |
+            const version = process.env.VERSION;
+            const tagName = `v${version}`;
+            const sha = context.sha;
+
+            const tag = await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tagName,
+              message: `Release ${tagName}`,
+              object: sha,
+              type: 'commit',
+            });
+
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tagName}`,
+              sha: tag.data.sha,
+            });
       - name: Generate changelog preview
         id: changelog
         if: github.event_name == 'workflow_dispatch' && steps.vars.outputs.dry_run == 'true'
