@@ -31,31 +31,16 @@ jobs:
       version: ${{ steps.vars.outputs.version }}
       dry_run: ${{ steps.vars.outputs.dry_run }}
     steps:
-      - name: Generate GitHub App token for repository operations
-        id: precheck-app-token
-        uses: actions/create-github-app-token@v3.0.0
-        with:
-          app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
-          private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
-          owner: kludgeworks
-          repositories: mcp-server-rdf
-          permission-contents: write
-          permission-metadata: read
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
           fetch-depth: 0
-          token: ${{ steps.precheck-app-token.outputs.token }}
       - name: Setup mise
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           cache: true
-      - name: Configure git identity
-        run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Resolve version
         id: vars
         shell: bash
@@ -77,7 +62,7 @@ jobs:
         env:
           VERSION: ${{ steps.vars.outputs.version }}
         with:
-          github-token: ${{ steps.precheck-app-token.outputs.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const version = process.env.VERSION;
             const tagName = `v${version}`;
