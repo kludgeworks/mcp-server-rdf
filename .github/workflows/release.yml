@@ -75,6 +75,29 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+      - name: Generate changelog preview
+        id: changelog
+        if: github.event_name == 'workflow_dispatch' && steps.vars.outputs.dry_run == 'true'
+        uses: jreleaser/release-action@v2
+        with:
+          setup-java: false
+          arguments: changelog --dry-run
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ steps.vars.outputs.version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add dry run summary
+        if: github.event_name == 'workflow_dispatch' && steps.vars.outputs.dry_run == 'true'
+        shell: bash
+        run: |
+          {
+            echo "## Release Dry Run"
+            echo
+            echo "- Resolved version: \`${{ steps.vars.outputs.version }}\`"
+            echo
+            echo "## Changelog Preview"
+            echo
+            cat out/jreleaser/release/CHANGELOG.md
+          } >> "$GITHUB_STEP_SUMMARY"
   assemble:
     if: needs.precheck.outputs.dry_run == 'false'
     needs: [precheck]
@@ -87,8 +110,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [precheck, assemble]
     if: needs.precheck.outputs.dry_run == 'false'
-    env:
-      MISE_HTTP_TIMEOUT: 90s
     steps:
       - name: Checkout
         uses: actions/checkout@v6
