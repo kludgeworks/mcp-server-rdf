@@ -84,11 +84,17 @@ arg "[bump]" {
 }
 flag "-n --dry-run" help="print the next version without creating a tag" env="RELEASE_DRY_RUN"
 flag "--push" help="push created tag to origin" env="RELEASE_PUSH"
+flag "--skip-ci" help="append [skip ci] to the tag message" env="CI"
 '''
 run = '''
 BUMP="${usage_bump:-next}"
 CURRENT_TAG="$(svu current)"
 NEXT_TAG="$(svu "$BUMP")"
+TAG_MESSAGE="Release $NEXT_TAG"
+
+if [ "${usage_skip_ci:-false}" = "true" ]; then
+  TAG_MESSAGE="${TAG_MESSAGE} [skip ci]"
+fi
 
 if [ "$CURRENT_TAG" = "$NEXT_TAG" ]; then
   case "$BUMP" in
@@ -100,7 +106,7 @@ if [ "$CURRENT_TAG" = "$NEXT_TAG" ]; then
         "$NEXT_TAG" "$CURRENT_TAG" >&2
       ;;
   esac
-  exit 0
+  exit 1
 fi
 
 if [ "${usage_dry_run:-false}" = "true" ]; then
@@ -108,8 +114,8 @@ if [ "${usage_dry_run:-false}" = "true" ]; then
   exit 0
 fi
 
-git tag -s "$NEXT_TAG" -m "Release $NEXT_TAG"
-echo "Created tag $NEXT_TAG"
+git tag -s "$NEXT_TAG" -m "$TAG_MESSAGE"
+printf '\033[32mCreated tag %s\033[0m\n' "$NEXT_TAG"
 if [ "${usage_push:-false}" = "true" ]; then
   git push origin "$NEXT_TAG"
   echo "Pushed tag $NEXT_TAG to origin"
