@@ -80,4 +80,5 @@ jobs:
         with:
           retention-days: 1
           name: artifact-${{ matrix.platform }}
-          path: out/jreleaser/assemble/archive/sparqlMcp/sparql-mcp-${{ inputs.project-version }}-${{ matrix.archive_platform }}.zip
+          path: out/jreleaser/assemble/sparqlMcp/archive/sparql-mcp-${{ inputs.project-version }}-${{ matrix.archive_platform }}.zip
+          if-no-files-found: error
