@@ -47,7 +47,7 @@ jobs:
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          cache: true
+          install: false
       - name: Resolve bot user ID
         id: bot-user
         env:
