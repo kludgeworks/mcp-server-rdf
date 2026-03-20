@@ -87,18 +87,32 @@ flag "--push" help="push created tag to origin" env="RELEASE_PUSH"
 '''
 run = '''
 BUMP="${usage_bump:-next}"
-NEXT_TAG="$(svu "${BUMP}")"
+CURRENT_TAG="$(svu current)"
+NEXT_TAG="$(svu "$BUMP")"
 
-if [ "${usage_dry_run:-false}" = "true" ]; then
-  echo "${NEXT_TAG#v}"
+if [ "$CURRENT_TAG" = "$NEXT_TAG" ]; then
+  case "$BUMP" in
+    next)
+      printf '\033[33mNo semantic versioning changes detected\033[0m\n' >&2
+      ;;
+    *)
+      printf '\033[33mComputed next tag %s matches current tag %s\033[0m\n' \
+        "$NEXT_TAG" "$CURRENT_TAG" >&2
+      ;;
+  esac
   exit 0
 fi
 
-git tag -s "${NEXT_TAG}" -m "Release ${NEXT_TAG}"
-echo "Created tag ${NEXT_TAG}"
+if [ "${usage_dry_run:-false}" = "true" ]; then
+  printf '\033[32mNext tag: %s\033[0m\n' "$NEXT_TAG" >&2
+  exit 0
+fi
+
+git tag -s "$NEXT_TAG" -m "Release $NEXT_TAG"
+echo "Created tag $NEXT_TAG"
 if [ "${usage_push:-false}" = "true" ]; then
-  git push origin "${NEXT_TAG}"
-  echo "Pushed tag ${NEXT_TAG} to origin"
+  git push origin "$NEXT_TAG"
+  echo "Pushed tag $NEXT_TAG to origin"
 fi
 '''
 
