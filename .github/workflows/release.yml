@@ -17,7 +17,7 @@ on:
           - minor
           - major
       dry_run:
-        description: Compute next version only (no tag push, no release)
+        description: Dry run
         required: true
         default: true
         type: boolean
@@ -85,8 +85,9 @@ jobs:
         shell: bash
         run: |
           RELEASE_BUMP="${{ github.event.inputs.bump }}" \
-          RELEASE_PUSH=true \
+          RELEASE_NO_SIGN=true \
           mise run -q release:tag
+          git push origin --tags
       - name: Generate changelog preview
         id: changelog
         if: github.event_name == 'workflow_dispatch' && steps.vars.outputs.dry_run == 'true'
