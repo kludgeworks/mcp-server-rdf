@@ -6,6 +6,40 @@ on:
         required: true
         type: string
 jobs:
+  jar:
+    name: Build release jar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Setup mise
+        uses: jdx/mise-action@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          cache: true
+      - name: Cache Maven
+        id: cache-m2
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+            ~/.m2/mvnd
+          key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-m2-
+      - name: Build release jar
+        run: mise run build --skip-tests package
+      - name: Upload release jar
+        uses: actions/upload-artifact@v7
+        with:
+          retention-days: 1
+          name: artifact-jar
+          path: target/sparql-mcp-${{ inputs.project-version }}.jar
+          if-no-files-found: error
   assemble:
     name: Assemble ${{ matrix.platform }}
     strategy:

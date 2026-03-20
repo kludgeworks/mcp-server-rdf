@@ -123,24 +123,6 @@ jobs:
         with:
           pattern: artifact-*
           path: artifacts
-      - name: Setup mise
-        uses: jdx/mise-action@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          cache: true
-      - name: Cache Maven
-        id: cache-m2
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-            ~/.m2/mvnd
-          key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-m2-
-      - name: Build release jar
-        run: mise run build --skip-tests package
       - name: Generate GitHub App token for Homebrew tap
         id: app-token
         uses: actions/create-github-app-token@v3.0.0

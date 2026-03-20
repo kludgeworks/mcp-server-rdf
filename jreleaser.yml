@@ -59,7 +59,7 @@ assemble:
             - sparql-mcp.exe
 files:
   artifacts:
-    - path: target/sparql-mcp-{{projectVersion}}.jar
+    - path: artifacts/artifact-jar/sparql-mcp-{{projectVersion}}.jar
 distributions:
   sparql-mcp:
     type: BINARY
