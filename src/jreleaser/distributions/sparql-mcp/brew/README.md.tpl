@@ -1,33 +1,33 @@
 # Homebrew Tap
 
-This repository contains the Homebrew formula for `mcp-sparql`.
+This repository contains the Homebrew formula for `sparql-mcp`.
 
 ## Install
 
 Install directly from the tap:
 
 ```sh
-brew install kludgeworks/tap/mcp-sparql
+brew install kludgeworks/tap/sparql-mcp
 ```
 
 Or tap the repository first and then install:
 
 ```sh
 brew tap kludgeworks/tap
-brew install mcp-sparql
+brew install sparql-mcp
 ```
 
 ## Update
 
 ```sh
 brew update
-brew upgrade mcp-sparql
+brew upgrade sparql-mcp
 ```
 
 ## Uninstall
 
 ```sh
-brew uninstall mcp-sparql
+brew uninstall sparql-mcp
 ```
 
 ## Repository
