@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
           private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
