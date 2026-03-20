@@ -1,6 +1,8 @@
+# $schema https://mise.jdx.dev/schema/mise.json
+
 [tools]
 java = "graalvm-community-25"
-hk = { version = "latest", postinstall = "hk install --mise" }
+hk = "latest"
 pkl = "latest"
 "github:google/google-java-format" = "latest"
 uv = "latest"
@@ -10,8 +12,12 @@ yamlfmt = "latest"
 [env]
 HK_MISE = true
 
+[hooks]
+postinstall = "hk install --mise"
+
 [settings]
 env_cache = true
+experimental = true
 
 [tasks.lint]
 description = "Run hk validation checks configured for the project"
@@ -102,5 +108,8 @@ build-test = "mise run build test"
 build-package = "mise run build package"
 build-native = "mise run build --profile native native:compile"
 build-native-test = "mise run build --profile nativeTest test"
+docker-build = "mise run docker:build"
+docker-install-log = "mise run docker:install-log"
+docker-shell = "mise run docker:shell"
 release-tag = "mise run release:tag"
 run = "mise run build spring-boot:run"
