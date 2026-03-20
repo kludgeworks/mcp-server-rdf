@@ -1,6 +1,7 @@
 package com.kludgeworks.mcp.sparql;
 
 import java.io.IOException;
+import org.jspecify.annotations.Nullable;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.http.MediaType;
@@ -47,11 +48,11 @@ class RdfService {
                   "Maximum number of characters to return in this page: defaults to "
                       + DEFAULT_PAGE_SIZE_CHARS,
               required = false)
-          Integer maxChars,
+          @Nullable Integer maxChars,
       @McpToolParam(
               description = "Character offset for paging through the full response",
               required = false)
-          Integer offset)
+          @Nullable Integer offset)
       throws IOException {
     return paginate(
         rdfBackendClient.executeQuery(serviceUrl, query, SPARQL_RESULTS_JSON_MEDIA_TYPE),
@@ -70,18 +71,18 @@ class RdfService {
       @McpToolParam(
               description = "Maximum number of characters to return in this page",
               required = false)
-          Integer maxChars,
+          @Nullable Integer maxChars,
       @McpToolParam(
               description = "Character offset for paging through the full response",
               required = false)
-          Integer offset)
+          @Nullable Integer offset)
       throws IOException {
     return paginate(
         rdfBackendClient.executeQuery(serviceUrl, query, RDF_JSON_MEDIA_TYPE), maxChars, offset);
   }
 
-  private String paginate(String responseBody, Integer maxChars, Integer offset)
-      throws IOException {
+  private String paginate(
+      String responseBody, @Nullable Integer maxChars, @Nullable Integer offset) {
     int pageSizeChars = (maxChars == null || maxChars <= 0) ? DEFAULT_PAGE_SIZE_CHARS : maxChars;
     int effectiveOffset = (offset == null || offset < 0) ? 0 : offset;
     int totalChars = responseBody.length();
