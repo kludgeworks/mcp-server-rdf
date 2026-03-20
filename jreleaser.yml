@@ -74,14 +74,14 @@ distributions:
         platform: osx-aarch_64
       - path: artifacts/artifact-windows-x86_64/sparql-mcp-{{projectVersion}}-windows-x64.zip
         platform: windows-x86_64
-
-#packagers:
-#  brew:
-#    active: ALWAYS
-#    multiPlatform: true
-#    formulaName: McpSparql
-#    repository:
-#      active: ALWAYS
-#      owner: kludgeworks
-#      name: homebrew-tap
-#      branch: main
+packagers:
+  brew:
+    active: ALWAYS
+    continueOnError: true
+    multiPlatform: true
+    formulaName: McpSparql
+    repository:
+      active: ALWAYS
+      owner: kludgeworks
+      name: homebrew-tap
+      branch: main
