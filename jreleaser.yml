@@ -65,6 +65,8 @@ distributions:
     type: BINARY
     extraProperties:
       graalVMNativeImage: true
+    brew:
+      formulaName: mcp-sparql
     artifacts:
       - path: artifacts/artifact-linux-x86_64/sparql-mcp-{{projectVersion}}-linux-x64.zip
         platform: linux-x86_64
@@ -79,7 +81,6 @@ packagers:
     active: ALWAYS
     continueOnError: true
     multiPlatform: true
-    formulaName: McpSparql
     repository:
       active: ALWAYS
       owner: kludgeworks
