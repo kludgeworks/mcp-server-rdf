@@ -40,7 +40,7 @@ catalog:
 assemble:
   archive:
     sparqlMcp:
-      active: NEVER
+      active: ALWAYS
       exported: false
       distributionType: BINARY
       attachPlatform: true

@@ -75,7 +75,6 @@ jobs:
           arguments: assemble
         env:
           JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}
-          JRELEASER_ASSEMBLE_ARCHIVE_SPARQL_MCP_ACTIVE: ALWAYS
       - name: Upload native artifact
         uses: actions/upload-artifact@v7
         with:
