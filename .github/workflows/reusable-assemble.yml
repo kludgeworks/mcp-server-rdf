@@ -37,8 +37,6 @@ jobs:
             binary_source: sparql-mcp-windows-x86_64.exe
             executable_name: sparql-mcp.exe
     runs-on: ${{ matrix.os }}
-    env:
-      MISE_HTTP_TIMEOUT: 90s
     steps:
       - name: Checkout
         uses: actions/checkout@v6
