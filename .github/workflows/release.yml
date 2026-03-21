@@ -21,6 +21,9 @@ on:
         required: true
         default: true
         type: boolean
+concurrency:
+  group: release
+  cancel-in-progress: true
 permissions:
   contents: write
   packages: write

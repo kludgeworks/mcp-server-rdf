@@ -34,7 +34,7 @@ jobs:
   assemble:
     name: Assemble ${{ matrix.platform }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - os: ubuntu-latest
@@ -94,7 +94,7 @@ jobs:
   container:
     name: Publish container ${{ matrix.image_tag }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - os: ubuntu-latest
