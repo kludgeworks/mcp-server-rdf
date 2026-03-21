@@ -38,12 +38,16 @@ jobs:
         with:
           app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
           private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
+          fetch-depth: 0
       - name: Setup build environment
         uses: ./.github/actions/setup-build-env
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          checkout-token: ${{ steps.app-token.outputs.token }}
-          checkout-ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || github.ref }}
           mise-install: "false"
       - name: Resolve bot user ID
         id: bot-user

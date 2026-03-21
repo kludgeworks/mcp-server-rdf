@@ -13,6 +13,11 @@ jobs:
     name: Build release jar
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
       - name: Setup build environment
         uses: ./.github/actions/setup-build-env
         with:
@@ -49,6 +54,11 @@ jobs:
             native_image_name: sparql-mcp-windows-aarch_64
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
       - name: Setup build environment
         uses: ./.github/actions/setup-build-env
         with:
@@ -93,6 +103,11 @@ jobs:
             image_tag: linux-arm64
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
       - name: Setup build environment
         uses: ./.github/actions/setup-build-env
         with:
@@ -104,7 +119,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install pack
-        uses: buildpacks/github-actions/setup-pack@v5
+        uses: buildpacks/github-actions/setup-pack@v5.11.0
       - name: Set temporary image reference
         shell: bash
         run: echo "TEMP_IMAGE=ghcr.io/kludgeworks/sparql-mcp:tmp-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.image_tag }}" >> "$GITHUB_ENV"

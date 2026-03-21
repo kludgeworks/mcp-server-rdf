@@ -1,21 +1,9 @@
 name: Setup Build Environment
-description: Checkout source, install mise tools, and warm the Maven cache
+description: Install mise tools and warm the Maven cache
 inputs:
   github-token:
     description: GitHub token used by mise-action
     required: true
-  checkout-token:
-    description: Optional token passed to actions/checkout
-    required: false
-    default: ""
-  checkout-ref:
-    description: Ref passed to actions/checkout
-    required: false
-    default: ${{ github.sha }}
-  fetch-depth:
-    description: Fetch depth passed to actions/checkout
-    required: false
-    default: "0"
   mise-cache:
     description: Whether mise-action should enable caching
     required: false
@@ -27,12 +15,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        token: ${{ inputs.checkout-token }}
-        ref: ${{ inputs.checkout-ref }}
-        fetch-depth: ${{ inputs.fetch-depth }}
     - name: Setup mise
       uses: jdx/mise-action@v4
       with:
