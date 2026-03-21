@@ -125,6 +125,11 @@ jobs:
         with:
           pattern: artifact-*
           path: artifacts
+      - name: Download container digests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: container-digest-*
+          path: container-digests
       - name: Generate GitHub App token for Homebrew tap
         id: app-token
         uses: actions/create-github-app-token@v3.0.0
@@ -144,6 +149,52 @@ jobs:
           JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_HOMEBREW_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Promote Linux container images by digest
+        shell: bash
+        run: |
+          amd64_digest="$(cat container-digests/container-digest-linux-amd64/digest-linux-amd64.txt)"
+          arm64_digest="$(cat container-digests/container-digest-linux-arm64/digest-linux-arm64.txt)"
+
+          docker buildx imagetools create \
+            --tag ghcr.io/kludgeworks/sparql-mcp:${{ needs.precheck.outputs.version }}-linux-amd64 \
+            ghcr.io/kludgeworks/sparql-mcp@"${amd64_digest}"
+
+          docker buildx imagetools create \
+            --tag ghcr.io/kludgeworks/sparql-mcp:${{ needs.precheck.outputs.version }}-linux-arm64 \
+            ghcr.io/kludgeworks/sparql-mcp@"${arm64_digest}"
+      - name: Create Linux multi-arch manifest
+        shell: bash
+        run: |
+          amd64_digest="$(cat container-digests/container-digest-linux-amd64/digest-linux-amd64.txt)"
+          arm64_digest="$(cat container-digests/container-digest-linux-arm64/digest-linux-arm64.txt)"
+
+          docker buildx imagetools create \
+            --tag ghcr.io/kludgeworks/sparql-mcp:${{ needs.precheck.outputs.version }} \
+            ghcr.io/kludgeworks/sparql-mcp@"${amd64_digest}" \
+            ghcr.io/kludgeworks/sparql-mcp@"${arm64_digest}"
+      - name: Inspect Linux multi-arch manifest
+        run: docker buildx imagetools inspect ghcr.io/kludgeworks/sparql-mcp:${{ needs.precheck.outputs.version }}
+      - name: Delete temporary container tags
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEMP_TAG_PREFIX: tmp-${{ github.run_id }}-${{ github.run_attempt }}-
+        run: |
+          gh api --paginate /orgs/kludgeworks/packages/container/sparql-mcp/versions \
+            --jq '.[] | select(any(.metadata.container.tags[]?; startswith(env.TEMP_TAG_PREFIX))) | .id' |
+          while read -r version_id; do
+            if [ -n "${version_id}" ]; then
+              gh api -X DELETE "/orgs/kludgeworks/packages/container/sparql-mcp/versions/${version_id}"
+            fi
+          done
       - name: Upload JReleaser logs
         if: always()
         uses: actions/upload-artifact@v7

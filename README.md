@@ -68,13 +68,12 @@ Artifacts and publication are then handled by GitHub Actions + JReleaser:
 - distribution model: `BINARY` in `jreleaser.yml`
 
 Artifacts are produced per platform with unique names, then attached to the GitHub release.
-The assemble workflow also publishes native container images to:
+The assemble workflow publishes Linux container images to temporary registry tags and records their digests.
+The final release job promotes those digests to:
 
 - `ghcr.io/kludgeworks/sparql-mcp:<version>` (Linux multi-arch manifest for amd64 and arm64)
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-amd64`
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-arm64`
-- `ghcr.io/kludgeworks/sparql-mcp:<version>-windows-amd64`
-- `ghcr.io/kludgeworks/sparql-mcp:<version>-windows-arm64`
 
 > [!IMPORTANT]
 > The `workflow_dispatch` entry point currently fails for our release process. We need artifact signing as part of the workflow, and for now the working path is via the CLI (`mise tag --push`).
