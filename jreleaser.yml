@@ -76,6 +76,8 @@ distributions:
         platform: osx-aarch_64
       - path: artifacts/artifact-windows-x86_64/sparql-mcp-{{projectVersion}}-windows-x64.zip
         platform: windows-x86_64
+      - path: artifacts/artifact-windows-aarch_64/sparql-mcp-{{projectVersion}}-windows-aarch64.zip
+        platform: windows-aarch_64
 packagers:
   brew:
     active: ALWAYS

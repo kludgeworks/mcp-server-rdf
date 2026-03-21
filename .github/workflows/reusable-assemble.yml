@@ -58,6 +58,9 @@ jobs:
           - os: windows-latest
             platform: windows-x86_64
             native_image_name: sparql-mcp-windows-x86_64
+          - os: windows-11-arm
+            platform: windows-aarch_64
+            native_image_name: sparql-mcp-windows-aarch_64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
