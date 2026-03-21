@@ -11,16 +11,10 @@
 #USAGE flag "-n --dry-run" help="print the next version without creating a tag" env="RELEASE_DRY_RUN"
 #USAGE flag "--push" help="push created tag to origin" env="RELEASE_PUSH"
 #USAGE flag "-f --force" help="overwrite an existing local and remote tag; requires --push" env="RELEASE_FORCE"
-#USAGE flag "--skip-ci" help="append [skip ci] to the tag message" env="CI"
+#USAGE flag "--skip-ci" help="append [skip ci] to the tag message" env="RELEASE_SKIP_CI"
 #USAGE flag "--no-sign" help="create an unsigned annotated tag" env="RELEASE_NO_SIGN"
 
 set -euo pipefail
-
-print_stdout() {
-  local color="$1"
-  shift
-  gum style --foreground "$color" "$*"
-}
 
 print_stderr() {
   local color="$1"
@@ -37,7 +31,7 @@ info() {
 }
 
 success() {
-  print_stdout "#16A34A" "$*"
+  print_stderr "#16A34A" "$*"
 }
 
 BUMP="${usage_bump:-next}"

@@ -89,6 +89,7 @@ jobs:
         shell: bash
         run: |
           RELEASE_BUMP="${{ github.event.inputs.bump }}" \
+          RELEASE_SKIP_CI=true \
           RELEASE_NO_SIGN=true \
           mise run -q release
           git push origin --tags
