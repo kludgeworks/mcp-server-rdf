@@ -23,6 +23,7 @@ on:
         type: boolean
 permissions:
   contents: write
+  packages: write
 jobs:
   precheck:
     name: Precheck

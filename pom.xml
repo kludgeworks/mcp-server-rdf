@@ -32,6 +32,7 @@
 		<spring-ai.version>2.0.0-M3</spring-ai.version>
 		<spring-modulith.version>2.0.3</spring-modulith.version>
 		<native.image.name>${project.artifactId}</native.image.name>
+		<container.image.name>ghcr.io/kludgeworks/${project.artifactId}:${project.version}</container.image.name>
 		<error-prone.version>2.48.0</error-prone.version>
 		<nullaway.version>0.13.1</nullaway.version>
 	</properties>
@@ -176,6 +177,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<name>${container.image.name}</name>
+						<env>
+							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+						</env>
+					</image>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
