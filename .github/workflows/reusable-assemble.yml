@@ -13,27 +13,10 @@ jobs:
     name: Build release jar
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
         with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-      - name: Setup mise
-        uses: jdx/mise-action@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          cache: true
-      - name: Cache Maven
-        id: cache-m2
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-            ~/.m2/mvnd
-          key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-m2-
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build release jar
         run: mise run build --skip-tests package
       - name: Upload release jar
@@ -66,27 +49,10 @@ jobs:
             native_image_name: sparql-mcp-windows-aarch_64
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
         with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-      - name: Setup mise
-        uses: jdx/mise-action@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          cache: true
-      - name: Cache Maven
-        id: cache-m2
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-            ~/.m2/mvnd
-          key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-m2-
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: mise run build --clean --profile native --native-image-name "${{ matrix.native_image_name }}" native:compile
       - name: Prepare archive input
@@ -131,27 +97,10 @@ jobs:
             image_tag: windows-arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
         with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-      - name: Setup mise
-        uses: jdx/mise-action@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          cache: true
-      - name: Cache Maven
-        id: cache-m2
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-            ~/.m2/mvnd
-          key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-m2-
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Log in to GHCR
         uses: docker/login-action@v4
         with:

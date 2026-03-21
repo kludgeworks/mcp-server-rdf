@@ -1,0 +1,51 @@
+name: Setup Build Environment
+description: Checkout source, install mise tools, and warm the Maven cache
+inputs:
+  github-token:
+    description: GitHub token used by mise-action
+    required: true
+  checkout-token:
+    description: Optional token passed to actions/checkout
+    required: false
+    default: ""
+  checkout-ref:
+    description: Ref passed to actions/checkout
+    required: false
+    default: ${{ github.sha }}
+  fetch-depth:
+    description: Fetch depth passed to actions/checkout
+    required: false
+    default: "0"
+  mise-cache:
+    description: Whether mise-action should enable caching
+    required: false
+    default: "true"
+  mise-install:
+    description: Whether mise-action should install tools
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        token: ${{ inputs.checkout-token }}
+        ref: ${{ inputs.checkout-ref }}
+        fetch-depth: ${{ inputs.fetch-depth }}
+    - name: Setup mise
+      uses: jdx/mise-action@v4
+      with:
+        github_token: ${{ inputs.github-token }}
+        cache: ${{ inputs.mise-cache }}
+        install: ${{ inputs.mise-install }}
+    - name: Cache Maven
+      uses: actions/cache@v5
+      with:
+        path: |
+          ~/.m2/repository
+          ~/.m2/wrapper
+          ~/.m2/mvnd
+        key: ${{ runner.os }}-${{ runner.arch }}-m2-${{ hashFiles('**/pom.xml', '.mvn/**') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ runner.arch }}-m2-
