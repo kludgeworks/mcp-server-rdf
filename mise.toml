@@ -2,7 +2,7 @@
 
 [tools]
 java = "graalvm-community-25"
-hk = { version = "latest", postinstall = "mise exec pkl -- hk install --mise" }
+hk = { version = "latest", postinstall = "mise exec --silent pkl -- hk install --mise" }
 pkl = "latest"
 "github:google/google-java-format" = "latest"
 uv = "latest"
