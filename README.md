@@ -75,9 +75,6 @@ The final release job promotes those digests to:
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-amd64`
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-arm64`
 
-> [!IMPORTANT]
-> The `workflow_dispatch` entry point currently fails for our release process. We need artifact signing as part of the workflow, and for now the working path is via the CLI (`mise release --push`).
-
 ## Notes
 
 - Default transport is MCP over STDIO (see `application.yml`).
