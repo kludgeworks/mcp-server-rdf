@@ -4,6 +4,9 @@ on:
     branches:
       - '**'
   pull_request:
+concurrency:
+  group: ci
+  cancel-in-progress: false
 jobs:
   test:
     name: build
