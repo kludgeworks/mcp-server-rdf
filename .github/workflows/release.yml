@@ -75,7 +75,7 @@ jobs:
             VERSION="$(
               RELEASE_BUMP="${{ github.event.inputs.bump }}" \
               RELEASE_DRY_RUN=true \
-              mise run -q release:tag | tail -n1 | tr -d '\r'
+              mise run -q release | tail -n1 | tr -d '\r'
             )"
           else
             VERSION="${GITHUB_REF_NAME#v}"
@@ -90,7 +90,7 @@ jobs:
         run: |
           RELEASE_BUMP="${{ github.event.inputs.bump }}" \
           RELEASE_NO_SIGN=true \
-          mise run -q release:tag
+          mise run -q release
           git push origin --tags
       - name: Generate changelog preview
         id: changelog

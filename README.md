@@ -43,7 +43,7 @@ After activating mise in your shell you can use these aliases:
 - `build-native` -> `mise run build --profile native native:compile`
 - `build-native-image` -> `mise run build --profile native spring-boot:build-image`
 - `build-native-test` -> `mise run build --profile nativeTest test`
-- `release-tag` -> `mise run release:tag`
+- `release` -> `mise run release`
 
 ## Versioning
 
@@ -58,7 +58,7 @@ This repository uses `maven-git-versioning-extension` (`.mvn/extensions.xml`).
 Releases are currently triggered by:
 
 ```bash
-mise tag --push
+mise release --push
 ```
 
 Artifacts and publication are then handled by GitHub Actions + JReleaser:
@@ -76,7 +76,7 @@ The final release job promotes those digests to:
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-arm64`
 
 > [!IMPORTANT]
-> The `workflow_dispatch` entry point currently fails for our release process. We need artifact signing as part of the workflow, and for now the working path is via the CLI (`mise tag --push`).
+> The `workflow_dispatch` entry point currently fails for our release process. We need artifact signing as part of the workflow, and for now the working path is via the CLI (`mise release --push`).
 
 ## Notes
 
