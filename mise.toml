@@ -2,7 +2,7 @@
 
 [tools]
 java = "graalvm-community-25"
-hk = { version = "latest", postinstall = "mise exec --silent pkl -- hk install --mise" }
+hk = "latest"
 pkl = "latest"
 "github:google/google-java-format" = "latest"
 uv = "latest"
@@ -15,6 +15,10 @@ HK_MISE = true
 
 [settings]
 env_cache = true
+experimental = true
+
+[hooks]
+postinstall = "hk install --mise"
 
 [tasks.lint]
 description = "Run hk validation checks configured for the project"
