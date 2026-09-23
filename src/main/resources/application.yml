@@ -6,7 +6,7 @@ spring:
       server:
         stdio: true
         name: rdf-sparql
-        version: 0.0.1
+        version: ${build.version:0.0.0-SNAPSHOT}
         type: SYNC
   main:
     banner-mode: off
