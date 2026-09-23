@@ -29,9 +29,9 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
-		<spring-ai.version>2.0.0-M3</spring-ai.version>
+		<spring-ai.version>2.0.1</spring-ai.version>
 		<spring-modulith.version>2.0.3</spring-modulith.version>
-		<jspecify.version>1.0.0</jspecify.version>
+		<jspecify.version>1.0.1</jspecify.version>
 		<appdirs.version>1.5.0</appdirs.version>
 		<native.image.name>${project.artifactId}</native.image.name>
 		<container.image.name>ghcr.io/kludgeworks/${project.artifactId}:${project.version}</container.image.name>
