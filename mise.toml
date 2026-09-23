@@ -2,13 +2,16 @@
 
 [tools]
 java = "graalvm-community-25"
-hk = "latest"
+hk = "1.58.1"
 pkl = "latest"
 "github:google/google-java-format" = "latest"
 uv = "latest"
 actionlint = "latest"
+pinact = "latest"
 yamlfmt = "latest"
 shellcheck = "latest"
+shfmt = "latest"
+"github:apache/maven-mvnd" = "latest"
 
 [env]
 HK_MISE = true
@@ -18,7 +21,7 @@ env_cache = true
 experimental = true
 
 [hooks]
-postinstall = "hk install --mise"
+postinstall = "hk install"
 
 [tasks.lint]
 description = "Run hk validation checks configured for the project"
@@ -28,50 +31,9 @@ run = "hk check"
 description = "Apply hk automatic fixes configured for the project"
 run = "hk fix"
 
-[tasks.build]
-description = "run Maven lifecycle goals"
-tools = { usage = "latest" }
-alias = "b"
-shell = "bash -c"
-usage = '''
-arg "[goals]..." {
-  choices "validate" "compile" "test" "package" "verify" "install" "deploy" "native:compile" "spring-boot:run" "spring-boot:build-image"
-}
-flag "-c --clean" help="run clean before the selected goal"
-flag "-s --skip-tests" help="set -DskipTests"
-flag "-p --profile <profile>" {
-  choices "native" "nativeTest"
-}
-flag "--native-image-name <name>" help="set -Dnative.image.name for native builds"
-'''
-run = '''
-MVN_ARGS=()
-
-if [ "${usage_skip_tests:-false}" = "true" ]; then
-  MVN_ARGS+=("-DskipTests")
-fi
-
-if [ "${usage_clean:-false}" = "true" ]; then
-  MVN_ARGS+=("clean")
-fi
-
-if [ -n "${usage_profile:-}" ]; then
-  MVN_ARGS+=("-P${usage_profile}")
-fi
-
-if [ -n "${usage_native_image_name:-}" ]; then
-  MVN_ARGS+=("-Dnative.image.name=${usage_native_image_name}")
-fi
-
-if [ -n "${usage_goals:-}" ]; then
-  eval "GOALS=(${usage_goals:-})"
-  MVN_ARGS+=("${GOALS[@]}")
-else
-  MVN_ARGS+=("package")
-fi
-
-./mvnw "${MVN_ARGS[@]}"
-'''
+[tasks.dependency-updates]
+description = "Report available Maven dependency and plugin updates"
+run = "./mvnw versions:display-dependency-updates versions:display-plugin-updates"
 
 [shell_alias]
 build = "mise run build"
@@ -85,3 +47,5 @@ docker-install-log = "mise run docker:install-log"
 docker-shell = "mise run docker:shell"
 release = "mise run release"
 run = "mise run build spring-boot:run"
+mvnw = "mvnd"
+mvn = "mvnd"

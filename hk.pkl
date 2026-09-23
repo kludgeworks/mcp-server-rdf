@@ -1,22 +1,21 @@
-amends "package://github.com/jdx/hk/releases/download/v1.32.0/hk@1.32.0#/Config.pkl"
-import "package://github.com/jdx/hk/releases/download/v1.32.0/hk@1.32.0#/Builtins.pkl"
+amends "package://github.com/jdx/hk/releases/download/v1.58.1/hk@1.58.1#/Config.pkl"
+
+import "package://github.com/jdx/hk/releases/download/v1.58.1/hk@1.58.1#/Builtins.pkl"
 
 local linters = new Mapping<String, Step> {
   ["actionlint"] = (Builtins.actionlint)
   ["check-merge-conflict"] = Builtins.check_merge_conflict
   ["check_added_large_files"] = Builtins.check_added_large_files
-  ["google_java_format"] {
-    glob = List("**/*.java")
-    exclude = List("**/target/**")
-    check = "google-java-format --dry-run --set-exit-if-changed {{files}}"
-    fix = "google-java-format --replace {{files}}"
-    batch = true
-  }
+  ["google_java_format"] = Builtins.google_java_format
   ["mise"] = Builtins.mise
   ["mixed_line_ending"] = Builtins.mixed_line_ending
   ["newlines"] = (Builtins.newlines)
   ["pkl_format"] = Builtins.pkl_format
+  ["pinact_update"] = Builtins.pinact_update
   ["shellcheck"] = Builtins.shellcheck
+  ["shfmt"] = (Builtins.shfmt) {
+    exclude = "mvnw"
+  }
   ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
     exclude =
       (Builtins.trailing_whitespace.exclude ?? List()) //TODO log an issue with hk about this, it feels awkward
