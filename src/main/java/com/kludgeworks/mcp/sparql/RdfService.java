@@ -4,10 +4,14 @@ import java.io.IOException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+// The paged envelope is serialised by Jackson, so the native image needs reflection metadata for
+// it.
+@RegisterReflectionForBinding({RdfService.PagedResult.class, RdfService.Pagination.class})
 @Service
 class RdfService {
 
@@ -29,10 +33,15 @@ class RdfService {
 
   private final RdfBackendClient rdfBackendClient;
   private final ObjectMapper objectMapper;
+  private final SparqlMcpProperties properties;
 
-  RdfService(RdfBackendClient rdfBackendClient, ObjectMapper objectMapper) {
+  RdfService(
+      RdfBackendClient rdfBackendClient,
+      ObjectMapper objectMapper,
+      SparqlMcpProperties properties) {
     this.rdfBackendClient = rdfBackendClient;
     this.objectMapper = objectMapper;
+    this.properties = properties;
   }
 
   @Tool(
@@ -55,7 +64,8 @@ class RdfService {
           @Nullable Integer offset)
       throws IOException {
     return paginate(
-        rdfBackendClient.executeQuery(serviceUrl, query, SPARQL_RESULTS_JSON_MEDIA_TYPE),
+        rdfBackendClient.executeQuery(
+            checkEndpointAllowed(serviceUrl), query, SPARQL_RESULTS_JSON_MEDIA_TYPE),
         maxChars,
         offset);
   }
@@ -78,7 +88,21 @@ class RdfService {
           @Nullable Integer offset)
       throws IOException {
     return paginate(
-        rdfBackendClient.executeQuery(serviceUrl, query, RDF_JSON_MEDIA_TYPE), maxChars, offset);
+        rdfBackendClient.executeQuery(checkEndpointAllowed(serviceUrl), query, RDF_JSON_MEDIA_TYPE),
+        maxChars,
+        offset);
+  }
+
+  /**
+   * Checked before the cached backend call, so a cached response is never served for an endpoint
+   * that has since been removed from the allowlist.
+   */
+  private String checkEndpointAllowed(String serviceUrl) {
+    if (!properties.isEndpointAllowed(serviceUrl)) {
+      throw new IllegalArgumentException(
+          "SPARQL endpoint is not allowed by sparql-mcp.allowed-endpoints: " + serviceUrl);
+    }
+    return serviceUrl;
   }
 
   private String paginate(

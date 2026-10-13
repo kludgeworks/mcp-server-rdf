@@ -3,11 +3,10 @@
 	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 	<springProperty scope="context" name="SPRING_APP_NAME" source="spring.application.name" defaultValue="mcp-sparql"/>
 	<springProperty scope="context" name="BUILD_GROUP" source="build.group" defaultValue="kludgeworks"/>
-	<springProperty scope="context" name="BUILD_VERSION" source="build.version" defaultValue="unknown"/>
-	<define name="APP_LOG_DIR" class="com.kludgeworks.mcp.sparql.logging.AppDirsLogPathDefiner">
+	<define name="APP_LOG_DIR" class="com.kludgeworks.mcp.sparql.logging.LogDirectoryDefiner">
 		<appName>${SPRING_APP_NAME}</appName>
 		<appAuthor>${BUILD_GROUP}</appAuthor>
-		<appVersion>${BUILD_VERSION}</appVersion>
+		<override>${LOG_PATH:-}</override>
 	</define>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

@@ -1,0 +1,12 @@
+# Loaded in addition to the main application.yml (config/ overrides it), so tests never write the
+# cache or logs into the real user directories. A file at the classpath root would shadow the main
+# configuration instead.
+#
+# Paths are relative to the working directory, which is the project directory for both Maven and
+# IDE test runs, so everything stays under target/ and is removed by `mvn clean`.
+sparql-mcp:
+  cache:
+    directory: target/test-tmp/${random.uuid}/cache
+logging:
+  file:
+    path: target/test-tmp/logs

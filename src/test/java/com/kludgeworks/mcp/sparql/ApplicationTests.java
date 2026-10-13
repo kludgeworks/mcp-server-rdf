@@ -1,15 +1,19 @@
 package com.kludgeworks.mcp.sparql;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 @SpringBootTest
-@Import(AppDirsTestConfig.Config.class)
-class ApplicationTests extends AppDirsTestConfig {
+class ApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+  @Autowired private McpServerRunner runner;
 
+  @Test
+  void runsOnStdioWithoutWebServerByDefault() {
+    assertThat(runner.isRunning()).isTrue();
+    assertThat(runner.httpPort()).isEqualTo(-1);
+  }
 }

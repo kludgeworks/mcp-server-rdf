@@ -1,12 +1,32 @@
 spring:
   application:
     name: mcp-sparql-server
-  ai:
-    mcp:
-      server:
-        stdio: true
-        name: rdf-sparql
-        version: ${build.version:0.0.0-SNAPSHOT}
-        type: SYNC
   main:
     banner-mode: off
+    # The HTTP transport starts its own embedded Tomcat (see McpServerRunner), so Spring Boot never
+    # starts a web server. This keeps the bean graph identical for both transports, which is what
+    # lets a single native image run in either mode.
+    web-application-type: none
+sparql-mcp:
+  # Short alias so the mode can be chosen with --transport=stdio|http.
+  transport: ${transport:stdio}
+  server:
+    name: rdf-sparql
+    version: ${build.version:0.0.0-SNAPSHOT}
+management:
+  endpoints:
+    jmx:
+      exposure:
+        exclude: "*"
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+        add-additional-paths: false
+      show-details: never
+  metrics:
+    tags:
+      application: ${spring.application.name}

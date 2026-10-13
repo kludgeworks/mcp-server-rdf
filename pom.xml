@@ -28,11 +28,12 @@
 		<url/>
 	</scm>
 	<properties>
+		<!-- Empty default so Surefire's @{argLine} resolves when no plugin (e.g. JaCoCo) has set it. -->
+		<argLine></argLine>
 		<java.version>25</java.version>
 		<spring-ai.version>2.0.1</spring-ai.version>
 		<spring-modulith.version>2.0.3</spring-modulith.version>
 		<jspecify.version>1.0.1</jspecify.version>
-		<appdirs.version>1.5.0</appdirs.version>
 		<native.image.name>${project.artifactId}</native.image.name>
 		<container.image.name>ghcr.io/kludgeworks/${project.artifactId}:${project.version}</container.image.name>
 		<error-prone.version>2.48.0</error-prone.version>
@@ -46,7 +47,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-starter-mcp-server</artifactId>
+			<artifactId>spring-ai-mcp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-mcp-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.modulith</groupId>
@@ -61,22 +78,9 @@
 			<artifactId>spring-boot-starter-restclient</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
 			<classifier>jakarta</classifier>
-		</dependency>
-		<dependency>
-			<groupId>javax.cache</groupId>
-			<artifactId>cache-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.harawata</groupId>
-			<artifactId>appdirs</artifactId>
-			<version>${appdirs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -152,6 +156,16 @@
 							<artifactId>spring-boot-configuration-processor</artifactId>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Keep temp files (JUnit @TempDir, the embedded Tomcat work dir) under target/. This must
+					     be a JVM flag: the JDK reads java.io.tmpdir once at startup, so systemPropertyVariables
+					     would be applied too late. @{argLine} keeps flags other plugins add (e.g. JaCoCo). -->
+					<argLine>@{argLine} -Djava.io.tmpdir=${project.build.directory}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

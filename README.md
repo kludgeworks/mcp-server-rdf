@@ -17,6 +17,40 @@ run
 > [!TIP]
 > For task/flag autocompletion, enable `mise` shell completion and install `usage` (docs: https://mise.jdx.dev/cli/completion.html and https://usage.jdx.dev/cli/completions).
 
+## Running Modes
+
+The same jar, native binary, and container image can run in either mode. Choose it at startup with
+`--transport=stdio|http` (or the environment variable `SPARQL_MCP_TRANSPORT`):
+
+| Mode | How to start | Use it for |
+| --- | --- | --- |
+| `stdio` (default) | `sparql-mcp` | MCP clients that launch the server as a subprocess |
+| `http` | `sparql-mcp --transport=http` | A long-running service, using stateless Streamable HTTP at `/mcp` |
+
+In `http` mode the server also exposes:
+
+- `GET /health`, `/health/liveness`, `/health/readiness`: probes (`200` when UP, `503` otherwise)
+- `GET /metrics`: Prometheus scrape (tool calls, SPARQL backend requests, cache hits and misses, JVM)
+
+### Container
+
+```bash
+docker run --rm -p 127.0.0.1:8080:8080 \
+  -e SPARQL_MCP_TRANSPORT=http \
+  -e SPARQL_MCP_HTTP_ADDRESS=0.0.0.0 \
+  -e SPARQL_MCP_CACHE_DIRECTORY=/cache -v sparql-mcp-cache:/cache \
+  ghcr.io/kludgeworks/sparql-mcp:<version>
+```
+
+If other containers reach the server by service name, add that name to
+`SPARQL_MCP_HTTP_ALLOWED_HOSTS` (for example `localhost:*,sparql-mcp:*`).
+
+### Cache
+
+Query responses are cached for 24 hours in a persistent Ehcache store. Ehcache locks its directory,
+so when a second process starts on the same directory (for example, two MCP clients each launching
+the server), that process falls back to an in-memory cache and logs a warning.
+
 ## Tasks
 
 List all available tasks with:
@@ -77,5 +111,5 @@ The final release job promotes those digests to:
 
 ## Notes
 
-- Default transport is MCP over STDIO (see `application.yml`).
-- Runtime logs should not be written to STDOUT when used as an MCP stdio server.
+- Default transport is MCP over STDIO (see [Running Modes](#running-modes)).
+- Runtime logs are written to STDERR and a log file, never STDOUT, so they cannot corrupt the stdio protocol.
