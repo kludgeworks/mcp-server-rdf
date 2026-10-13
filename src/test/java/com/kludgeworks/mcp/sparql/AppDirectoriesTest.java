@@ -11,16 +11,19 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class AppDirectoriesTest {
 
-  private static final Path HOME = Path.of("/home/user");
+  // Paths are built from the filesystem root so they are absolute on every OS. A path such as
+  // "/home/user" has no drive letter, so it is not absolute on Windows.
+  private static final Path ROOT = Path.of("").toAbsolutePath().getRoot();
+  private static final Path HOME = path("home/user");
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("platforms")
   void resolvesPlatformDirectories(
-      String platform, String osName, Map<String, String> env, String cache, String logs) {
+      String platform, String osName, Map<String, String> env, Path cache, Path logs) {
     AppDirectories dirs = new AppDirectories(osName, env, HOME);
 
-    assertThat(dirs.cacheDir("app", "author")).isEqualTo(Path.of(cache));
-    assertThat(dirs.logDir("app", "author")).isEqualTo(Path.of(logs));
+    assertThat(dirs.cacheDir("app", "author")).isEqualTo(cache);
+    assertThat(dirs.logDir("app", "author")).isEqualTo(logs);
   }
 
   static Stream<Arguments> platforms() {
@@ -29,37 +32,43 @@ class AppDirectoriesTest {
             "macOS",
             "Mac OS X",
             Map.of(),
-            "/home/user/Library/Caches/app",
-            "/home/user/Library/Logs/app"),
+            path("home/user/Library/Caches/app"),
+            path("home/user/Library/Logs/app")),
         Arguments.of(
             "Linux defaults",
             "Linux",
             Map.of(),
-            "/home/user/.cache/app",
-            "/home/user/.local/state/app/logs"),
+            path("home/user/.cache/app"),
+            path("home/user/.local/state/app/logs")),
         Arguments.of(
             "Linux with XDG variables",
             "Linux",
-            Map.of("XDG_CACHE_HOME", "/xdg/cache", "XDG_STATE_HOME", "/xdg/state"),
-            "/xdg/cache/app",
-            "/xdg/state/app/logs"),
+            Map.of(
+                "XDG_CACHE_HOME", path("xdg/cache").toString(),
+                "XDG_STATE_HOME", path("xdg/state").toString()),
+            path("xdg/cache/app"),
+            path("xdg/state/app/logs")),
         Arguments.of(
             "Linux ignores relative XDG variables",
             "Linux",
             Map.of("XDG_CACHE_HOME", "relative/cache", "XDG_STATE_HOME", "relative/state"),
-            "/home/user/.cache/app",
-            "/home/user/.local/state/app/logs"),
+            path("home/user/.cache/app"),
+            path("home/user/.local/state/app/logs")),
         Arguments.of(
             "Windows with LOCALAPPDATA",
             "Windows 11",
-            Map.of("LOCALAPPDATA", "/appdata/local"),
-            "/appdata/local/author/app/Cache",
-            "/appdata/local/author/app/Logs"),
+            Map.of("LOCALAPPDATA", path("appdata/local").toString()),
+            path("appdata/local/author/app/Cache"),
+            path("appdata/local/author/app/Logs")),
         Arguments.of(
             "Windows without LOCALAPPDATA",
             "Windows 11",
             Map.of(),
-            "/home/user/AppData/Local/author/app/Cache",
-            "/home/user/AppData/Local/author/app/Logs"));
+            path("home/user/AppData/Local/author/app/Cache"),
+            path("home/user/AppData/Local/author/app/Logs")));
+  }
+
+  private static Path path(String relativeToRoot) {
+    return ROOT.resolve(relativeToRoot);
   }
 }

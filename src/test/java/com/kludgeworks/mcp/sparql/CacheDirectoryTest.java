@@ -10,9 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.Status;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+// Close this context (and Ehcache's open files) after the class, before JUnit deletes the
+// @TempDir; Windows cannot delete files that are still open.
+@DirtiesContext
 @SpringBootTest
 class CacheDirectoryTest {
 
