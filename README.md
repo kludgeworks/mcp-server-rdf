@@ -38,7 +38,9 @@ run
 ## Running Modes
 
 The same jar, native binary, and container image can run in either mode. Choose it at startup with
-`--transport=stdio|http` (or the environment variable `SPARQL_MCP_TRANSPORT`):
+`-t`/`--transport=stdio|http` (or the environment variable `SPARQL_MCP_TRANSPORT`). Run
+`sparql-mcp --help` for all options; any other `--<property>=<value>` argument is passed to Spring
+Boot.
 
 | Mode | How to start | Use it for |
 | --- | --- | --- |

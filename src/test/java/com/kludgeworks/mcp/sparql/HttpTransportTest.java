@@ -19,8 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-// Starts with the documented short argument, so the --transport alias is covered too.
-@SpringBootTest(args = "--transport=http", properties = "sparql-mcp.http.port=0")
+@SpringBootTest(properties = {"sparql-mcp.transport=http", "sparql-mcp.http.port=0"})
 class HttpTransportTest {
 
   private static final String TOOLS_LIST =

@@ -2,7 +2,7 @@ package com.kludgeworks.mcp.sparql;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
@@ -18,12 +18,15 @@ public class Application {
   private static final String BUILD_INFO = "META-INF/build-info.properties";
 
   static void main(String[] args) {
-    // Handled before Spring starts, so it is instant and never opens the stdio transport.
-    if (Arrays.asList(args).contains("--version")) {
-      System.out.println("sparql-mcp " + version());
-      return;
+    SparqlMcpCommand command = new SparqlMcpCommand();
+    int exitCode = SparqlMcpCommand.commandLine(command).execute(args);
+    if (exitCode != 0) {
+      System.exit(exitCode);
     }
-    SpringApplication.run(Application.class, args);
+    List<String> springArguments = command.springArguments();
+    if (springArguments != null) {
+      SpringApplication.run(Application.class, springArguments.toArray(String[]::new));
+    }
   }
 
   /** The project version from the build-info file the Spring Boot plugin generates. */

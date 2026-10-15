@@ -8,8 +8,7 @@ spring:
     # lets a single native image run in either mode.
     web-application-type: none
 sparql-mcp:
-  # Short alias so the mode can be chosen with --transport=stdio|http.
-  transport: ${transport:stdio}
+  transport: stdio
   server:
     name: rdf-sparql
     version: ${build.version:0.0.0-SNAPSHOT}
