@@ -2,6 +2,24 @@
 
 Spring Boot MCP server that executes SPARQL queries against RDF backends.
 
+## Install
+
+### Homebrew (macOS and Linux)
+
+```bash
+brew tap kludgeworks/tap
+brew trust kludgeworks/tap
+brew install sparql-mcp
+```
+
+Upgrade with `brew upgrade sparql-mcp`.
+
+### Other options
+
+- Native binaries for Linux, macOS and Windows, and the JVM jar, are attached to each
+  [GitHub release](https://github.com/kludgeworks/mcp-server-rdf/releases).
+- Container image: `ghcr.io/kludgeworks/sparql-mcp:<version>` (see [Container](#container)).
+
 ## Requirements
 
 - [mise](https://mise.jdx.dev/)
