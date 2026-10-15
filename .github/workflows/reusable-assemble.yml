@@ -25,7 +25,7 @@ jobs:
       - name: Build release jar
         run: mise run build --skip-tests package
       - name: Upload release jar
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           retention-days: 1
           name: artifact-jar
@@ -87,7 +87,7 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}
       - name: Upload native artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           retention-days: 1
           name: artifact-${{ matrix.platform }}
@@ -121,7 +121,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install pack
-        uses: buildpacks/github-actions/setup-pack@af8c06ccd592e27001cbf78083dcc9b47aa6652a # v6.1.1
+        uses: buildpacks/github-actions/setup-pack@a96fc9720ee9ccf19d4c87c3de9c344a2c404c29 # v6.2.0
       - name: Set temporary image reference
         shell: bash
         run: echo "TEMP_IMAGE=ghcr.io/kludgeworks/sparql-mcp:tmp-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.image_tag }}" >> "$GITHUB_ENV"
@@ -142,7 +142,7 @@ jobs:
           digest="$(docker buildx imagetools inspect "${TEMP_IMAGE}" | awk '/Digest:/ { print $2; exit }')"
           printf '%s\n' "${digest}" > "digest-${{ matrix.image_tag }}.txt"
       - name: Upload image digest
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           retention-days: 1
           name: container-digest-${{ matrix.image_tag }}
