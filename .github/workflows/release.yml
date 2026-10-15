@@ -50,25 +50,31 @@ jobs:
         with:
           pattern: container-digest-*
           path: container-digests
-      - name: Generate GitHub App token for Homebrew tap
-        id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
-          private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
-          owner: kludgeworks
-          repositories: homebrew-tap
-          permission-contents: write
-          permission-metadata: read
+      # The Homebrew formula is published separately, after verify-homebrew has installed and
+      # tested it, so a broken formula never reaches the tap.
       - name: Version & Tag
         uses: jreleaser/release-action@90ac653bb9c79d11179e65d81499f3f34527dcd5 # 2.5.0
         with:
           setup-java: false
-          arguments: full-release
+          arguments: full-release --exclude-packager brew
         env:
           JRELEASER_PROJECT_VERSION: ${{ needs.extract-version.outputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JRELEASER_HOMEBREW_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Generate Homebrew formula
+        uses: jreleaser/release-action@90ac653bb9c79d11179e65d81499f3f34527dcd5 # 2.5.0
+        with:
+          setup-java: false
+          arguments: package --packager brew
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ needs.extract-version.outputs.version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Homebrew formula
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          retention-days: 1
+          name: homebrew-formula
+          path: out/jreleaser/package/sparql-mcp/brew/Formula/sparql-mcp.rb
+          if-no-files-found: error
       - name: Log in to GHCR
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -121,6 +127,85 @@ jobs:
         with:
           retention-days: 1
           name: jreleaser-release
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties
+  verify-homebrew:
+    name: Verify Homebrew formula (${{ matrix.os }})
+    needs: [release]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_INSTALL_CLEANUP: '1'
+      HOMEBREW_NO_ANALYTICS: '1'
+    steps:
+      - name: Download Homebrew formula
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: homebrew-formula
+          path: formula
+      - name: Add Homebrew to PATH
+        if: runner.os == 'Linux'
+        run: echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+      # Homebrew refuses to install formulae from a file path, so stage it in a throwaway tap.
+      # Homebrew 7+ also only loads formulae from taps that have been explicitly trusted.
+      - name: Install and test formula
+        run: |
+          brew tap-new --no-git kludgeworks/release-check
+          if brew trust --help >/dev/null 2>&1; then
+            brew trust --tap kludgeworks/release-check
+          fi
+          cp formula/sparql-mcp.rb "$(brew --repository kludgeworks/release-check)/Formula/"
+          brew install kludgeworks/release-check/sparql-mcp
+          brew test kludgeworks/release-check/sparql-mcp
+      - name: Audit formula
+        continue-on-error: true
+        run: brew audit --formula kludgeworks/release-check/sparql-mcp
+  publish-homebrew:
+    name: Publish Homebrew formula
+    runs-on: ubuntu-latest
+    needs: [extract-version, verify-homebrew]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Download assembled artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: artifact-*
+          path: artifacts
+      - name: Generate GitHub App token for Homebrew tap
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.KLUDGEWORKS_SPARQL_ID }}
+          private-key: ${{ secrets.KLUDGEWORKS_SPARQL_PRIVATE_KEY }}
+          owner: kludgeworks
+          repositories: homebrew-tap
+          permission-contents: write
+          permission-metadata: read
+      # publish regenerates the formula from the same artifacts that verify-homebrew tested.
+      - name: Publish to tap
+        uses: jreleaser/release-action@90ac653bb9c79d11179e65d81499f3f34527dcd5 # 2.5.0
+        with:
+          setup-java: false
+          arguments: publish --packager brew
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ needs.extract-version.outputs.version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_HOMEBREW_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Upload JReleaser logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          retention-days: 1
+          name: jreleaser-publish-homebrew
           path: |
             out/jreleaser/trace.log
             out/jreleaser/output.properties
