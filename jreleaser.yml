@@ -44,10 +44,7 @@ assemble:
       exported: false
       distributionType: BINARY
       attachPlatform: true
-      # JReleaser cannot pick a format per platform, so every runner builds both and the assemble
-      # workflow uploads tar.gz for Linux/macOS and zip for Windows.
       formats:
-        - TAR_GZ
         - ZIP
       archiveName: sparql-mcp-{{projectVersion}}
       fileSets:
@@ -71,11 +68,11 @@ distributions:
     brew:
       formulaName: sparql-mcp
     artifacts:
-      - path: artifacts/artifact-linux-x86_64/sparql-mcp-{{projectVersion}}-linux-x64.tar.gz
+      - path: artifacts/artifact-linux-x86_64/sparql-mcp-{{projectVersion}}-linux-x64.zip
         platform: linux-x86_64
-      - path: artifacts/artifact-linux-aarch_64/sparql-mcp-{{projectVersion}}-linux-aarch64.tar.gz
+      - path: artifacts/artifact-linux-aarch_64/sparql-mcp-{{projectVersion}}-linux-aarch64.zip
         platform: linux-aarch_64
-      - path: artifacts/artifact-osx-aarch_64/sparql-mcp-{{projectVersion}}-osx-aarch64.tar.gz
+      - path: artifacts/artifact-osx-aarch_64/sparql-mcp-{{projectVersion}}-osx-aarch64.zip
         platform: osx-aarch_64
       - path: artifacts/artifact-windows-x86_64/sparql-mcp-{{projectVersion}}-windows-x64.zip
         platform: windows-x86_64

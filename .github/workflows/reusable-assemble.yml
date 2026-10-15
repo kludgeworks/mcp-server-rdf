@@ -40,25 +40,20 @@ jobs:
           - os: ubuntu-latest
             platform: linux-x86_64
             native_image_name: sparql-mcp-linux-x86_64
-            archive_ext: tar.gz
           - os: ubuntu-24.04-arm
             platform: linux-aarch_64
             native_image_name: sparql-mcp-linux-aarch_64
-            archive_ext: tar.gz
           - os: macos-latest
             platform: osx-aarch_64
             native_image_name: sparql-mcp-osx-aarch_64
-            archive_ext: tar.gz
           - os: windows-latest
             platform: windows-x86_64
             native_image_name: sparql-mcp-windows-x86_64
-            archive_ext: zip
             # Disabled until the Windows ARM runner can install both
             # google-java-format and graalvm-community-25 via mise.
             # - os: windows-11-arm
             #   platform: windows-aarch_64
             #   native_image_name: sparql-mcp-windows-aarch_64
-            #   archive_ext: zip
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -96,7 +91,7 @@ jobs:
         with:
           retention-days: 1
           name: artifact-${{ matrix.platform }}
-          path: out/jreleaser/assemble/sparqlMcp/archive/*.${{ matrix.archive_ext }}
+          path: out/jreleaser/assemble/sparqlMcp/archive/*.zip
           if-no-files-found: error
   container:
     name: Publish container ${{ matrix.image_tag }}
