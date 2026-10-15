@@ -163,7 +163,6 @@ jobs:
           brew install kludgeworks/release-check/sparql-mcp
           brew test kludgeworks/release-check/sparql-mcp
       - name: Audit formula
-        continue-on-error: true
         run: brew audit --formula kludgeworks/release-check/sparql-mcp
   publish-homebrew:
     name: Publish Homebrew formula
