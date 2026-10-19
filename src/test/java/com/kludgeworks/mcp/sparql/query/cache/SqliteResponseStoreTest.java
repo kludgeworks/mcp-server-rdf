@@ -37,6 +37,17 @@ class SqliteResponseStoreTest {
   }
 
   @Test
+  void reportsPurgeDueEveryPurgeInterval() throws Exception {
+    SqliteResponseStore store = SqliteResponseStore.open(directory, clock, TTL, 1000);
+
+    for (int i = 1; i < SqliteResponseStore.PURGE_INTERVAL; i++) {
+      assertThat(store.put("key-" + i, "body")).isFalse();
+    }
+    assertThat(store.put("last", "body")).isTrue();
+    assertThat(store.put("next", "body")).isFalse();
+  }
+
+  @Test
   void enablesAutoVacuumOnNewDatabase() throws Exception {
     SqliteResponseStore.open(directory, clock, TTL, 100);
 

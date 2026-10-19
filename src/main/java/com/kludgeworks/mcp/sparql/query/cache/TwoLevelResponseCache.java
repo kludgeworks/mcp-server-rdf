@@ -21,6 +21,7 @@ import java.util.HexFormat;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Caffeine in memory in front of a SQLite store on disk. A memory miss falls back to the store, and
@@ -38,6 +39,7 @@ final class TwoLevelResponseCache implements ResponseCache {
 
   private final Cache<String, StoredResponse> memory;
   private final @Nullable SqliteResponseStore store;
+  private final ApplicationEventPublisher events;
   private final Clock clock;
   private final Duration ttl;
   private final Counter storeHits;
@@ -48,8 +50,10 @@ final class TwoLevelResponseCache implements ResponseCache {
       int memoryEntries,
       Clock clock,
       Duration ttl,
-      MeterRegistry meterRegistry) {
+      MeterRegistry meterRegistry,
+      ApplicationEventPublisher events) {
     this.store = store;
+    this.events = events;
     this.clock = clock;
     this.ttl = ttl;
     // Entries loaded from the store keep their original expiry instead of starting a new TTL.
@@ -114,7 +118,9 @@ final class TwoLevelResponseCache implements ResponseCache {
       return;
     }
     try {
-      store.put(key, body);
+      if (store.put(key, body)) {
+        events.publishEvent(new ResponseStorePurgeDue());
+      }
     } catch (SQLException e) {
       log.warn("Could not write the response cache at {}: {}", store.file(), e.getMessage());
     }

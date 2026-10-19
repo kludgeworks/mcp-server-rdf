@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.modulith.Modulithic;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * Application modules, one per direct subpackage (verified by {@code ModularityTests}):
@@ -25,6 +26,7 @@ import org.springframework.modulith.Modulithic;
 @Modulithic(sharedModules = "platform")
 @SpringBootApplication
 @ConfigurationPropertiesScan
+@EnableAsync
 @ImportRuntimeHints(Application.BuildInfoHints.class)
 public class Application {
 

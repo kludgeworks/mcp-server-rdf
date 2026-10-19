@@ -27,8 +27,8 @@ final class SqliteResponseStore {
 
   static final String FILE_NAME = "responses.db";
 
-  /** Expired and surplus rows are removed at startup and after this many writes. */
-  private static final int PURGE_INTERVAL = 100;
+  /** A purge is due after this many writes; expired and surplus rows are also removed on open. */
+  static final int PURGE_INTERVAL = 100;
 
   private static final int BUSY_TIMEOUT_MILLIS = 5000;
 
@@ -103,7 +103,11 @@ final class SqliteResponseStore {
     }
   }
 
-  void put(String key, String body) throws SQLException {
+  /**
+   * Stores {@code body} under {@code key}. Returns true when a purge is due, which the caller runs
+   * in the background so the request is not held up.
+   */
+  boolean put(String key, String body) throws SQLException {
     try (Connection connection = dataSource.getConnection();
         PreparedStatement statement =
             connection.prepareStatement(
@@ -115,8 +119,9 @@ final class SqliteResponseStore {
     }
     if (writesSincePurge.incrementAndGet() >= PURGE_INTERVAL) {
       writesSincePurge.set(0);
-      purge();
+      return true;
     }
+    return false;
   }
 
   /** Whether the database can currently be queried. */

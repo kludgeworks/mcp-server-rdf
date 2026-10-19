@@ -18,7 +18,12 @@ class CaffeineHintsTest {
   void hintsCoverTheGeneratedClassesTheCacheUses() throws Exception {
     TwoLevelResponseCache cache =
         new TwoLevelResponseCache(
-            null, 10, Clock.systemUTC(), Duration.ofHours(1), new SimpleMeterRegistry());
+            null,
+            10,
+            Clock.systemUTC(),
+            Duration.ofHours(1),
+            new SimpleMeterRegistry(),
+            event -> {});
 
     Object localCache = field(field(cache, "memory"), "cache");
     Object nodeFactory = field(localCache, "nodeFactory");

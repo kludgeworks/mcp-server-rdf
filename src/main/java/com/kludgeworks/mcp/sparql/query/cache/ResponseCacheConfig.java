@@ -12,6 +12,7 @@ import java.time.Duration;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
@@ -28,14 +29,18 @@ class ResponseCacheConfig {
 
   @Bean
   TwoLevelResponseCache sparqlResponseCache(
-      AppMetadata appMetadata, QueryProperties properties, MeterRegistry meterRegistry) {
+      AppMetadata appMetadata,
+      QueryProperties properties,
+      MeterRegistry meterRegistry,
+      ApplicationEventPublisher events) {
     Clock clock = Clock.systemUTC();
     return new TwoLevelResponseCache(
         openStore(resolveDirectory(appMetadata, properties), clock),
         MEMORY_ENTRIES,
         clock,
         TTL,
-        meterRegistry);
+        meterRegistry,
+        events);
   }
 
   /** The cache keeps working in memory when the store cannot be opened. */

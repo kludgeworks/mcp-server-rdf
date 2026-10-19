@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jspecify.annotations.Nullable;
@@ -31,6 +33,7 @@ class TwoLevelResponseCacheTest {
   private final MutableClock clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
   private final AtomicInteger loads = new AtomicInteger();
   private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
+  private final List<Object> events = new ArrayList<>();
 
   @Test
   void servesRepeatedRequestsFromMemory() throws Exception {
@@ -96,6 +99,19 @@ class TwoLevelResponseCacheTest {
     assertThat(cache.get(REQUEST, this::load)).isEqualTo("response 1");
   }
 
+  @Test
+  void publishesPurgeDueAfterEnoughStoreWritesInsteadOfPurgingInline() throws Exception {
+    TwoLevelResponseCache cache = cache(store());
+
+    for (int i = 1; i <= SqliteResponseStore.PURGE_INTERVAL; i++) {
+      cache.get(
+          new SparqlRequest(REQUEST.serviceUrl(), "SELECT " + i + " {}", REQUEST.acceptType()),
+          this::load);
+      assertThat(events).hasSize(i < SqliteResponseStore.PURGE_INTERVAL ? 0 : 1);
+    }
+    assertThat(events).containsExactly(new ResponseStorePurgeDue());
+  }
+
   private String load() {
     return "response " + loads.incrementAndGet();
   }
@@ -105,6 +121,6 @@ class TwoLevelResponseCacheTest {
   }
 
   private TwoLevelResponseCache cache(@Nullable SqliteResponseStore store) {
-    return new TwoLevelResponseCache(store, 10, clock, TTL, meterRegistry);
+    return new TwoLevelResponseCache(store, 10, clock, TTL, meterRegistry, events::add);
   }
 }
