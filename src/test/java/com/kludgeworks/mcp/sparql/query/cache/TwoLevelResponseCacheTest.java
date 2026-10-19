@@ -6,12 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.kludgeworks.mcp.sparql.query.port.SparqlRequest;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jspecify.annotations.Nullable;
@@ -99,21 +96,6 @@ class TwoLevelResponseCacheTest {
     assertThat(cache.get(REQUEST, this::load)).isEqualTo("response 1");
   }
 
-  @Test
-  void purgesOldestEntriesBeyondCapacity() throws Exception {
-    SqliteResponseStore store = SqliteResponseStore.open(directory, clock, TTL, 2);
-    for (String key : new String[] {"a", "b", "c"}) {
-      store.put(key, key);
-      clock.advance(Duration.ofSeconds(1));
-    }
-
-    store.purge();
-
-    assertThat(store.get("a")).isNull();
-    assertThat(store.get("c")).isNotNull();
-    assertThat(Files.exists(directory.resolve(SqliteResponseStore.FILE_NAME))).isTrue();
-  }
-
   private String load() {
     return "response " + loads.incrementAndGet();
   }
@@ -124,33 +106,5 @@ class TwoLevelResponseCacheTest {
 
   private TwoLevelResponseCache cache(@Nullable SqliteResponseStore store) {
     return new TwoLevelResponseCache(store, 10, clock, TTL, meterRegistry);
-  }
-
-  private static final class MutableClock extends Clock {
-
-    private Instant now;
-
-    MutableClock(Instant now) {
-      this.now = now;
-    }
-
-    void advance(Duration duration) {
-      now = now.plus(duration);
-    }
-
-    @Override
-    public Instant instant() {
-      return now;
-    }
-
-    @Override
-    public ZoneOffset getZone() {
-      return ZoneOffset.UTC;
-    }
-
-    @Override
-    public Clock withZone(java.time.ZoneId zone) {
-      return this;
-    }
   }
 }

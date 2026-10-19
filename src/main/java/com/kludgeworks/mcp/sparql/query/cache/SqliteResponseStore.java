@@ -32,6 +32,9 @@ final class SqliteResponseStore {
 
   private static final int BUSY_TIMEOUT_MILLIS = 5000;
 
+  /** The value {@code PRAGMA auto_vacuum} reports for full mode. */
+  static final int AUTO_VACUUM_FULL = 1;
+
   private final Path file;
   private final SQLiteDataSource dataSource;
   private final Clock clock;
@@ -62,11 +65,18 @@ final class SqliteResponseStore {
     SqliteResponseStore store = new SqliteResponseStore(file, dataSource, clock, ttl, maxEntries);
     try (Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement()) {
+      // Returns pages freed by purge() to the file system on commit; without it the file never
+      // shrinks. SQLite applies this immediately to a new database, before its first table exists.
+      statement.execute("PRAGMA auto_vacuum = FULL");
       statement.executeUpdate(
           "CREATE TABLE IF NOT EXISTS responses ("
               + "key TEXT PRIMARY KEY, body TEXT NOT NULL, created_at INTEGER NOT NULL)");
       statement.executeUpdate(
           "CREATE INDEX IF NOT EXISTS responses_created_at ON responses (created_at)");
+      // An existing database only switches mode after a full VACUUM, which is needed once.
+      if (autoVacuumMode(statement) != AUTO_VACUUM_FULL) {
+        statement.execute("VACUUM");
+      }
     }
     store.purge();
     return store;
@@ -120,7 +130,10 @@ final class SqliteResponseStore {
     }
   }
 
-  /** Removes expired rows, then the oldest rows beyond {@code maxEntries}. */
+  /**
+   * Removes expired rows, then the oldest rows beyond {@code maxEntries}. Auto-vacuum returns the
+   * freed space to the file system.
+   */
   void purge() throws SQLException {
     try (Connection connection = dataSource.getConnection();
         PreparedStatement expired =
@@ -133,6 +146,12 @@ final class SqliteResponseStore {
       expired.executeUpdate();
       surplus.setInt(1, maxEntries);
       surplus.executeUpdate();
+    }
+  }
+
+  static int autoVacuumMode(Statement statement) throws SQLException {
+    try (ResultSet result = statement.executeQuery("PRAGMA auto_vacuum")) {
+      return result.next() ? result.getInt(1) : 0;
     }
   }
 
