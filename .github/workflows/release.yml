@@ -82,7 +82,9 @@ jobs:
         env:
           IMAGE: ghcr.io/kludgeworks/sparql-mcp
           VERSION: ${{ needs.extract-version.outputs.version }}
+        # pack manifest is still an experimental command, hidden unless experimental features are on.
         run: |
+          pack config experimental true
           pack manifest create "${IMAGE}:${VERSION}" \
             "${IMAGE}:${VERSION}-linux-amd64" \
             "${IMAGE}:${VERSION}-linux-arm64" \
