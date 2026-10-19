@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql.query.backend;
+package com.kludgeworks.mcp.sparql.query.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,8 +16,8 @@ import org.springframework.test.context.DynamicPropertySource;
 @SpringBootTest
 class CacheDirectoryTest {
 
-  // Not a JUnit @TempDir: Ehcache memory-maps its disk store, and Windows cannot delete a mapped
-  // file until the JVM releases it. Under target/, `mvn clean` removes it instead.
+  // Under target/ rather than a JUnit @TempDir: the Spring context outlives the test method, and
+  // `mvn clean` removes it.
   private static final Path CUSTOM_DIRECTORY =
       Path.of("target", "test-tmp", "custom-cache-" + UUID.randomUUID());
 
@@ -32,10 +32,11 @@ class CacheDirectoryTest {
   void persistsCacheInConfiguredDirectory() {
     Health health = healthIndicator.health();
 
-    assertThat(Files.isDirectory(CUSTOM_DIRECTORY)).isTrue();
+    assertThat(Files.isRegularFile(CUSTOM_DIRECTORY.resolve(SqliteResponseStore.FILE_NAME)))
+        .isTrue();
     assertThat(health.getStatus()).isEqualTo(Status.UP);
     assertThat(health.getDetails())
-        .containsEntry("cache", CacheConfig.CACHE_NAME)
+        .containsEntry("cache", TwoLevelResponseCache.CACHE_NAME)
         .containsEntry("storage", "persistent");
   }
 }

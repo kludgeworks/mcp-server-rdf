@@ -13,8 +13,7 @@ public record QueryProperties(
     @DefaultValue Cache cache, @DefaultValue List<String> allowedEndpoints) {
 
   /**
-   * @param directory Ehcache persistence directory; defaults to a per-transport directory under the
-   *     user cache dir
+   * @param directory directory holding the SQLite response cache; defaults to the user cache dir
    */
   public record Cache(@Nullable String directory) {}
 

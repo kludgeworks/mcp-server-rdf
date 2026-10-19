@@ -67,9 +67,11 @@ If other containers reach the server by service name, add that name to
 
 ### Cache
 
-Query responses are cached for 24 hours in a persistent Ehcache store. Ehcache locks its directory,
-so when a second process starts on the same directory (for example, two MCP clients each launching
-the server), that process falls back to an in-memory cache and logs a warning.
+Query responses are cached for 24 hours: in memory, and on disk in a SQLite database
+(`responses.db` in the platform cache directory, or `SPARQL_MCP_CACHE_DIRECTORY`). Every process on
+the machine shares it, so stdio sessions started by different MCP clients and a long-running HTTP
+service all benefit from each other's queries. If the database cannot be opened, the server logs a
+warning and caches in memory only.
 
 ## Tasks
 
