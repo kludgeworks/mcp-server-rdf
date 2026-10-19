@@ -1,5 +1,9 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.query.backend;
 
+import com.kludgeworks.mcp.sparql.platform.AppDirectories;
+import com.kludgeworks.mcp.sparql.platform.AppMetadata;
+import com.kludgeworks.mcp.sparql.query.QueryProperties;
+import com.kludgeworks.mcp.sparql.server.ServerProperties;
 import java.io.File;
 import java.time.Duration;
 import java.util.Locale;
@@ -22,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
  * so an in-memory cache would rarely be hit.
  */
 @Configuration
-public class CacheConfig {
+class CacheConfig {
 
   private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
 
@@ -32,9 +36,9 @@ public class CacheConfig {
   private static final Duration TTL = Duration.ofHours(24);
 
   @Bean(destroyMethod = "close")
-  public CacheManager responseCacheManager(
-      AppMetadata appMetadata, SparqlMcpProperties properties) {
-    File directory = resolveDirectory(appMetadata, properties);
+  CacheManager responseCacheManager(
+      AppMetadata appMetadata, QueryProperties queryProperties, ServerProperties serverProperties) {
+    File directory = resolveDirectory(appMetadata, queryProperties, serverProperties);
     ResourcePoolsBuilder heap =
         ResourcePoolsBuilder.newResourcePoolsBuilder().heap(HEAP_ENTRIES, EntryUnit.ENTRIES);
     try {
@@ -68,14 +72,15 @@ public class CacheConfig {
    * directory under the platform cache directory, so a long-running HTTP service and stdio clients
    * on the same machine do not contend for the same Ehcache lock.
    */
-  private static File resolveDirectory(AppMetadata appMetadata, SparqlMcpProperties properties) {
-    String configured = properties.cache().directory();
+  private static File resolveDirectory(
+      AppMetadata appMetadata, QueryProperties queryProperties, ServerProperties serverProperties) {
+    String configured = queryProperties.cache().directory();
     if (configured != null && !configured.isBlank()) {
       return new File(configured);
     }
     return AppDirectories.current()
         .cacheDir(appMetadata.name(), appMetadata.author())
-        .resolve("ehcache-" + properties.transport().name().toLowerCase(Locale.ROOT))
+        .resolve("ehcache-" + serverProperties.transport().name().toLowerCase(Locale.ROOT))
         .toFile();
   }
 }

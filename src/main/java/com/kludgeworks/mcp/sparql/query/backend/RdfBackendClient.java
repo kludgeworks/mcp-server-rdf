@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.query.backend;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -10,8 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+/** Sends SPARQL queries to a backend over HTTP, caching responses. */
 @Service
-class RdfBackendClient {
+public class RdfBackendClient {
 
   static final String CACHE_REQUESTS_METRIC = "sparql.cache.requests";
 
@@ -27,8 +28,11 @@ class RdfBackendClient {
    * The cache is used directly rather than through {@code @Cacheable} so hits and misses can be
    * counted in Micrometer; JMX-based cache statistics are not available in the native image.
    */
-  RdfBackendClient(RestClient restClient, CacheManager cacheManager, MeterRegistry meterRegistry) {
-    this.restClient = restClient;
+  RdfBackendClient(
+      RestClient.Builder restClientBuilder,
+      CacheManager cacheManager,
+      MeterRegistry meterRegistry) {
+    this.restClient = restClientBuilder.build();
     this.responseCache =
         Objects.requireNonNull(
             cacheManager.getCache(CacheConfig.CACHE_NAME, String.class, String.class),

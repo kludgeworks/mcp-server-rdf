@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.server;
 
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;

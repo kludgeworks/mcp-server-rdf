@@ -1,5 +1,6 @@
 package com.kludgeworks.mcp.sparql;
 
+import com.kludgeworks.mcp.sparql.server.ServerProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -38,7 +39,7 @@ class SparqlMcpCommand implements Callable<Integer> {
       names = {"-t", "--transport"},
       paramLabel = "<transport>",
       description = "stdio (default) or http. Overrides SPARQL_MCP_TRANSPORT.")
-  private SparqlMcpProperties.@Nullable Transport transport;
+  private ServerProperties.@Nullable Transport transport;
 
   @Unmatched private List<String> unmatched = new ArrayList<>();
 

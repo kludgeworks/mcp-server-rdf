@@ -3,7 +3,7 @@
 	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 	<springProperty scope="context" name="SPRING_APP_NAME" source="spring.application.name" defaultValue="mcp-sparql"/>
 	<springProperty scope="context" name="BUILD_GROUP" source="build.group" defaultValue="kludgeworks"/>
-	<define name="APP_LOG_DIR" class="com.kludgeworks.mcp.sparql.logging.LogDirectoryDefiner">
+	<define name="APP_LOG_DIR" class="com.kludgeworks.mcp.sparql.platform.logging.LogDirectoryDefiner">
 		<appName>${SPRING_APP_NAME}</appName>
 		<appAuthor>${BUILD_GROUP}</appAuthor>
 		<override>${LOG_PATH:-}</override>

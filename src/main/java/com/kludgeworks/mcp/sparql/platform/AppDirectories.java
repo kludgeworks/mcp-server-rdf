@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.platform;
 
 import java.nio.file.Path;
 import java.util.Locale;

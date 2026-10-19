@@ -9,9 +9,22 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ImportRuntimeHints;
+import org.springframework.modulith.Modulithic;
 
+/**
+ * Application modules, one per direct subpackage (verified by {@code ModularityTests}):
+ *
+ * <ul>
+ *   <li>{@code query}: runs SPARQL queries and exposes them as MCP tools
+ *   <li>{@code server}: the MCP runtime, serving every tool bean on stdio or HTTP
+ *   <li>{@code platform}: per-user directories, application metadata and logging
+ * </ul>
+ */
+@Modulithic(sharedModules = "platform")
 @SpringBootApplication
+@ConfigurationPropertiesScan
 @ImportRuntimeHints(Application.BuildInfoHints.class)
 public class Application {
 

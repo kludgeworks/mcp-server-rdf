@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.query.backend;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -28,7 +28,7 @@ class RdfBackendClientTest {
         .andExpect(method(HttpMethod.POST))
         .andRespond(withSuccess("{\"results\":{}}", RESULTS_JSON));
     SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
-    RdfBackendClient client = TestBackendClients.create(builder.build(), meterRegistry);
+    RdfBackendClient client = TestBackendClients.create(builder, meterRegistry);
 
     String first = client.executeQuery(ENDPOINT, "SELECT * {}", RESULTS_JSON);
     String second = client.executeQuery(ENDPOINT, "SELECT * {}", RESULTS_JSON);

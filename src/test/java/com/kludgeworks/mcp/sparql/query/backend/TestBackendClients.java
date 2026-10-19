@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.query.backend;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -9,15 +9,16 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.springframework.web.client.RestClient;
 
 /** Builds an {@link RdfBackendClient} backed by a fresh in-memory cache, outside Spring. */
-final class TestBackendClients {
+public final class TestBackendClients {
 
   private TestBackendClients() {}
 
-  static RdfBackendClient create() {
-    return create(RestClient.create(), new SimpleMeterRegistry());
+  public static RdfBackendClient create() {
+    return create(RestClient.builder(), new SimpleMeterRegistry());
   }
 
-  static RdfBackendClient create(RestClient restClient, MeterRegistry meterRegistry) {
+  static RdfBackendClient create(
+      RestClient.Builder restClientBuilder, MeterRegistry meterRegistry) {
     CacheManager cacheManager =
         CacheManagerBuilder.newCacheManagerBuilder()
             .withCache(
@@ -25,6 +26,6 @@ final class TestBackendClients {
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(
                     String.class, String.class, ResourcePoolsBuilder.heap(100)))
             .build(true);
-    return new RdfBackendClient(restClient, cacheManager, meterRegistry);
+    return new RdfBackendClient(restClientBuilder, cacheManager, meterRegistry);
   }
 }

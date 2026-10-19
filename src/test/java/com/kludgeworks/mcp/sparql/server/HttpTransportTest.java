@@ -1,10 +1,12 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 
+import com.kludgeworks.mcp.sparql.query.PagedResult;
+import com.kludgeworks.mcp.sparql.query.SparqlQueries;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,7 +16,6 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -39,7 +40,7 @@ class HttpTransportTest {
 
   @Autowired private McpServerRunner runner;
 
-  @MockitoBean private RdfBackendClient rdfBackendClient;
+  @MockitoBean private SparqlQueries queries;
 
   @Test
   void listsToolsWithOptionalPagingParameters() throws Exception {
@@ -57,8 +58,8 @@ class HttpTransportTest {
 
   @Test
   void callsToolAndRecordsMetrics() throws Exception {
-    given(rdfBackendClient.executeQuery(anyString(), anyString(), any(MediaType.class)))
-        .willReturn("{\"results\":{\"bindings\":[]}}");
+    given(queries.select(anyString(), anyString(), isNull(), isNull()))
+        .willReturn(new PagedResult(new PagedResult.Pagination(2, 5000, 1, 0, 0, 2), "{}"));
 
     HttpResponse<String> response = postMcp(SELECT_CALL, null);
 

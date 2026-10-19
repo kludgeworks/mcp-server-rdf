@@ -1,7 +1,7 @@
-package com.kludgeworks.mcp.sparql.logging;
+package com.kludgeworks.mcp.sparql.platform.logging;
 
 import ch.qos.logback.core.PropertyDefinerBase;
-import com.kludgeworks.mcp.sparql.AppDirectories;
+import com.kludgeworks.mcp.sparql.platform.AppDirectories;
 import java.io.File;
 import org.jspecify.annotations.Nullable;
 

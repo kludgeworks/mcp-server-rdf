@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.query.backend;
 
 import org.ehcache.CacheManager;
 import org.ehcache.PersistentCacheManager;

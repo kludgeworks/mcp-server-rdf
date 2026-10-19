@@ -1,4 +1,4 @@
-package com.kludgeworks.mcp.sparql;
+package com.kludgeworks.mcp.sparql.server;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -41,7 +41,8 @@ import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Starts the MCP server on the transport selected by {@code sparql-mcp.transport}.
+ * Starts the MCP server on the transport selected by {@code sparql-mcp.transport}, serving the
+ * tools of every {@link ToolCallbackProvider} bean.
  *
  * <p>The transport is chosen here at runtime instead of through Spring AI's conditional
  * auto-configuration. AOT processing freezes bean conditions at build time, but it does not freeze
@@ -53,8 +54,8 @@ class McpServerRunner implements SmartLifecycle {
   private static final Logger log = LoggerFactory.getLogger(McpServerRunner.class);
   private static final Duration SHUTDOWN_TIMEOUT = Duration.ofSeconds(30);
 
-  private final SparqlMcpProperties properties;
-  private final ToolCallbackProvider toolCallbackProvider;
+  private final ServerProperties properties;
+  private final List<ToolCallbackProvider> toolCallbackProviders;
   private final MeterRegistry meterRegistry;
   private final HealthEndpoint healthEndpoint;
   private final PrometheusMeterRegistry prometheusMeterRegistry;
@@ -67,15 +68,15 @@ class McpServerRunner implements SmartLifecycle {
   private @Nullable WebServer webServer;
 
   McpServerRunner(
-      SparqlMcpProperties properties,
-      ToolCallbackProvider toolCallbackProvider,
+      ServerProperties properties,
+      List<ToolCallbackProvider> toolCallbackProviders,
       MeterRegistry meterRegistry,
       HealthEndpoint healthEndpoint,
       PrometheusMeterRegistry prometheusMeterRegistry,
       JsonMapper jsonMapper,
       ApplicationEventPublisher eventPublisher) {
     this.properties = properties;
-    this.toolCallbackProvider = toolCallbackProvider;
+    this.toolCallbackProviders = toolCallbackProviders;
     this.meterRegistry = meterRegistry;
     this.healthEndpoint = healthEndpoint;
     this.prometheusMeterRegistry = prometheusMeterRegistry;
@@ -107,7 +108,7 @@ class McpServerRunner implements SmartLifecycle {
   }
 
   private void startHttp() {
-    SparqlMcpProperties.Http http = properties.http();
+    ServerProperties.Http http = properties.http();
     HttpServletStatelessServerTransport transport =
         HttpServletStatelessServerTransport.builder()
             .jsonMapper(mcpJsonMapper())
@@ -201,7 +202,8 @@ class McpServerRunner implements SmartLifecycle {
 
   private List<ToolCallback> toolCallbacks() {
     String transport = properties.transport().name().toLowerCase(Locale.ROOT);
-    return Arrays.stream(toolCallbackProvider.getToolCallbacks())
+    return toolCallbackProviders.stream()
+        .flatMap(provider -> Arrays.stream(provider.getToolCallbacks()))
         .<ToolCallback>map(callback -> new MeteredToolCallback(callback, meterRegistry, transport))
         .toList();
   }
