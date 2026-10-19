@@ -100,8 +100,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            arch: amd64
             image_tag: linux-amd64
           - os: ubuntu-24.04-arm
+            arch: arm64
             image_tag: linux-arm64
     runs-on: ${{ matrix.os }}
     steps:
@@ -122,29 +124,19 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install pack
         uses: buildpacks/github-actions/setup-pack@a96fc9720ee9ccf19d4c87c3de9c344a2c404c29 # v6.2.0
-      - name: Set temporary image reference
-        shell: bash
-        run: echo "TEMP_IMAGE=ghcr.io/kludgeworks/sparql-mcp:tmp-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.image_tag }}" >> "$GITHUB_ENV"
+      # Each architecture is built on its own native runner and published under a per-arch tag;
+      # the release job combines them into the multi-arch image with pack manifest. The build
+      # cache is kept in the registry, since CI runners start empty.
       - name: Build and publish image with pack
+        env:
+          IMAGE: ghcr.io/kludgeworks/sparql-mcp
         run: |
-          pack build "${TEMP_IMAGE}" \
+          pack build "${IMAGE}:${{ inputs.project-version }}-${{ matrix.image_tag }}" \
             --path . \
-            --builder paketobuildpacks/ubuntu-noble-builder \
+            --builder paketobuildpacks/builder-noble-java-tiny \
+            --platform "linux/${{ matrix.arch }}" \
+            --cache-image "${IMAGE}:build-cache-${{ matrix.image_tag }}" \
             --env BP_MAVEN_ACTIVE_PROFILES=native \
             --env BP_NATIVE_IMAGE=true \
             --env BP_JVM_VERSION=25 \
             --publish
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      - name: Capture image digest
-        shell: bash
-        run: |
-          digest="$(docker buildx imagetools inspect "${TEMP_IMAGE}" | awk '/Digest:/ { print $2; exit }')"
-          printf '%s\n' "${digest}" > "digest-${{ matrix.image_tag }}.txt"
-      - name: Upload image digest
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          retention-days: 1
-          name: container-digest-${{ matrix.image_tag }}
-          path: digest-${{ matrix.image_tag }}.txt
-          if-no-files-found: error

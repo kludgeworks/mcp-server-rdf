@@ -122,12 +122,15 @@ Artifacts and publication are then handled by GitHub Actions + JReleaser:
 - distribution model: `BINARY` in `jreleaser.yml`
 
 Artifacts are produced per platform with unique names, then attached to the GitHub release.
-The assemble workflow publishes Linux container images to temporary registry tags and records their digests.
-The final release job promotes those digests to:
+The assemble workflow builds a container image per architecture with Paketo buildpacks
+(`pack build`, tiny base image, no shell) on a native runner, and publishes it to:
 
-- `ghcr.io/kludgeworks/sparql-mcp:<version>` (Linux multi-arch manifest for amd64 and arm64)
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-amd64`
 - `ghcr.io/kludgeworks/sparql-mcp:<version>-linux-arm64`
+
+The final release job combines them with `pack manifest` into
+`ghcr.io/kludgeworks/sparql-mcp:<version>`, the multi-arch image to use.
+Build caches are kept in the registry as `build-cache-linux-amd64` and `build-cache-linux-arm64`.
 
 ## Notes
 
